@@ -2,13 +2,16 @@
 
 > **开源、轻量、可扩展的零售业务管理平台。基于电商ERP扩展，支持线上电商订单管理 + 线下POS收银 + 即时零售对接（美团闪购/淘宝闪购/京东到家/抖音小时达）。帮助零售商实现商品、采购、库存、销售、会员全链路数字化管理。**
 
-[![Java](https://img.shields.io/badge/Java-17-blue.svg)]()
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1-brightgreen.svg)]()
-[![Vue](https://img.shields.io/badge/Vue-3.5-4fc08d.svg)]()
-[![MySQL](https://img.shields.io/badge/MySQL-8-orange.svg)]()
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)]()
 
 ---
+
+**POS收银台**
+
+![POS](docs/pos.png)
+
+**管理视图**
+
+![管理视图](docs/manage.png)
 
 ## 📖 目录
 
