@@ -9,6 +9,7 @@
               placeholder="搜索商品/扫码..."
               clearable
               size="large"
+              @keyup.enter="handleSearch"
             >
               <template #prefix>
                 <el-icon :size="18"><Search /></el-icon>
@@ -45,7 +46,8 @@
               v-for="product in filteredProducts"
               :key="product.id"
               class="product-card"
-              @click="addToCart(product)"
+              :class="{ 'has-multi': product.skuList && product.skuList.length > 1, 'no-stock': getTotalAvailableStock(product) <= 0 }"
+              @click="handleProductClick(product)"
             >
               <div class="product-image">
                 <img
@@ -57,17 +59,57 @@
                 <div v-else class="img-fallback">
                   <el-icon :size="28"><Picture /></el-icon>
                 </div>
+                <div v-if="product.skuList && product.skuList.length > 1" class="sku-badge">
+                  {{ product.skuList.length }}种规格
+                </div>
+                <div v-if="hasMultipleBatches(product)" class="batch-badge">
+                  多批次
+                </div>
+                <div v-if="getTotalAvailableStock(product) <= 0" class="no-stock-badge">
+                  无库存
+                </div>
               </div>
               <div class="product-info">
-                <div class="product-name" :title="product.name">{{ product.name }}</div>
-                <div class="product-code">{{ product.goodsNum || '-' }}</div>
+                <div class="product-name" :title="product.name">
+                  {{ product.name }}
+                  <span v-if="product.shortName" class="product-short-name">({{ product.shortName }})</span>
+                </div>
+                <div class="product-meta-row">
+                  <span class="meta-item" v-if="product.goodsNum">
+                    <el-icon><CollectionTag /></el-icon>
+                    {{ product.goodsNum }}
+                  </span>
+                  <span class="meta-item" v-if="product.unitName">
+                    单位: {{ product.unitName }}
+                  </span>
+                </div>
+                <div v-if="product.skuList && product.skuList.length > 0" class="product-sku-list">
+                  <div v-for="sku in product.skuList.slice(0, 2)" :key="sku.id" class="sku-item-mini">
+                    <span class="sku-name">{{ getSkuDisplayName(sku) }}</span>
+                    <span class="sku-code" v-if="sku.skuCode">{{ sku.skuCode }}</span>
+                    <span class="sku-barcode" v-if="sku.barCode">条码:{{ sku.barCode }}</span>
+                    <span class="sku-stock" :class="{ 'low-stock': (sku.inventory?.availableQuantity ?? 0) <= 0 }">
+                      库存:{{ sku.inventory?.availableQuantity ?? '-' }}
+                    </span>
+                  </div>
+                  <div v-if="product.skuList.length > 2" class="sku-more">
+                    还有{{ product.skuList.length - 2 }}种...
+                  </div>
+                </div>
                 <div class="product-bottom">
-                  <span class="price">¥{{ formatPrice(product.retailPrice) }}</span>
+                  <div class="price-info">
+                    <span class="price">¥{{ formatPrice(product.retailPrice) }}</span>
+                    <span class="total-stock" :class="{ 'low-stock': getTotalAvailableStock(product) <= 0 }">
+                      <el-icon><Box /></el-icon>
+                      总库存:{{ getTotalAvailableStock(product) }}
+                    </span>
+                  </div>
                   <el-button
                     class="add-btn"
                     type="primary"
                     size="small"
                     circle
+                    :disabled="getTotalAvailableStock(product) <= 0"
                   >
                     <el-icon><Plus /></el-icon>
                   </el-button>
@@ -106,7 +148,18 @@
               <div v-else class="img-placeholder"><el-icon><Picture /></el-icon></div>
             </div>
             <div class="item-detail">
-              <div class="item-name">{{ item.name }}</div>
+              <div class="item-name" :title="item.name">
+                {{ item.shortName || item.name }}
+                <span class="item-full-name" v-if="item.shortName">{{ item.name }}</span>
+              </div>
+              <div class="item-sku-row">
+                <span class="item-sku" v-if="item.skuName">{{ item.skuName }}</span>
+                <span class="item-sku-code" v-if="item.skuCode">{{ item.skuCode }}</span>
+              </div>
+              <div class="item-meta-row">
+                <span class="item-barcode" v-if="item.barCode">条码: {{ item.barCode }}</span>
+                <span class="item-batch" v-if="item.batchNum">批次: {{ item.batchNum }}</span>
+              </div>
               <div class="item-price">¥{{ item.price.toFixed(2) }}</div>
             </div>
             <div class="item-qty">
@@ -156,6 +209,63 @@
         </div>
       </div>
     </div>
+
+    <el-dialog
+      v-model="showSkuDialog"
+      title="选择规格"
+      width="650px"
+      class="sku-dialog"
+    >
+      <div class="sku-dialog-body">
+        <div class="product-preview">
+          <img v-if="selectedProduct?.image" :src="selectedProduct.image" />
+          <div class="preview-info">
+            <h3>{{ selectedProduct?.name }}</h3>
+            <p class="preview-meta">
+              <span v-if="selectedProduct?.goodsNum">编码: {{ selectedProduct.goodsNum }}</span>
+              <span v-if="selectedProduct?.retailPrice">零售价: ¥{{ formatPrice(selectedProduct.retailPrice) }}</span>
+            </p>
+          </div>
+        </div>
+        
+        <div class="sku-list">
+          <div
+            v-for="sku in selectedProduct?.skuList"
+            :key="sku.id"
+            class="sku-item"
+            :class="{ 
+              active: selectedSku?.id === sku.id,
+              'no-stock': (sku.inventory?.availableQuantity ?? 0) <= 0
+            }"
+            @click="(sku.inventory?.availableQuantity ?? 0) > 0 && selectSku(sku)"
+          >
+            <div class="sku-info">
+              <div class="sku-name">{{ getSkuDisplayName(sku) }}</div>
+              <div class="sku-meta">
+                <span v-if="sku.skuCode">SKU: {{ sku.skuCode }}</span>
+                <span v-if="sku.barCode">条码: {{ sku.barCode }}</span>
+              </div>
+              <div class="sku-stock-info">
+                <span class="stock-item">
+                  <el-icon><Box /></el-icon>
+                  库存: {{ sku.inventory?.availableQuantity ?? '-' }}
+                </span>
+                <span v-if="sku.batches && sku.batches.length > 1" class="batch-indicator">
+                  {{ sku.batches.length }}个批次
+                </span>
+              </div>
+            </div>
+            <div class="sku-price">¥{{ formatPrice(sku.retailPrice) }}</div>
+          </div>
+        </div>
+      </div>
+      <template #footer>
+        <el-button @click="showSkuDialog = false">取消</el-button>
+        <el-button type="primary" :disabled="!selectedSku" @click="confirmSkuSelect">
+          确认选择
+        </el-button>
+      </template>
+    </el-dialog>
 
     <el-dialog
       v-model="showPaymentDialog"
@@ -226,13 +336,58 @@ import { ref, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   Search, Loading, Goods, Picture, Plus, Minus, Close,
-  ShoppingCart, Delete, Wallet, CreditCard, Money, CircleCheckFilled
+  ShoppingCart, Delete, Wallet, CreditCard, Money, CircleCheckFilled,
+  CollectionTag, Postcard, Box
 } from '@element-plus/icons-vue'
-import { listGoods } from '@/api/goods/goods'
+import { getGoodsList, getSkuInventory, getSkuInventoryBatches } from '@/api/pos/pos'
 import { listCategory } from '@/api/goods/category'
 import { addOrder } from '@/api/order/salesOrder'
 
-const products = ref<any[]>([])
+interface InventoryInfo {
+  skuId: string
+  quantity: number
+  availableQuantity: number
+}
+
+interface InventoryBatch {
+  id: number
+  skuId: string
+  batchNum: string
+  currentQty: number
+  barcode: string
+  stockStatus: number
+}
+
+interface Product {
+  id: string
+  name: string
+  shortName?: string
+  image?: string
+  goodsNum?: string
+  barCode?: string
+  unitName?: string
+  retailPrice?: number
+  categoryId?: number
+  skuList?: SkuItem[]
+  [key: string]: any
+}
+
+interface SkuItem {
+  id: string
+  goodsId?: string
+  skuName?: string
+  skuCode?: string
+  barCode?: string
+  colorValue?: string
+  sizeValue?: string
+  styleValue?: string
+  retailPrice?: number
+  inventory?: InventoryInfo
+  batches?: InventoryBatch[]
+  [key: string]: any
+}
+
+const products = ref<Product[]>([])
 const categories = ref<any[]>([])
 const loading = ref(false)
 const hasMore = ref(false)
@@ -243,9 +398,12 @@ const selectedCategory = ref<string | number>('all')
 const cartItems = ref<any[]>([])
 const showPaymentDialog = ref(false)
 const showSuccessDialog = ref(false)
+const showSkuDialog = ref(false)
 const selectedPay = ref('')
 const lastOrderNo = ref('')
 const lastOrderAmount = ref(0)
+const selectedProduct = ref<Product | null>(null)
+const selectedSku = ref<SkuItem | null>(null)
 
 const payMethods = [
   { key: 'wechat', name: '微信支付', icon: Wallet },
@@ -279,6 +437,38 @@ function formatPrice(price: any) {
   return Number(price).toFixed(2)
 }
 
+function getTotalAvailableStock(product: Product): number {
+  if (!product.skuList || product.skuList.length === 0) {
+    return product.inventory?.availableQuantity ?? (product as any).quantity ?? 0
+  }
+  let total = 0
+  for (const sku of product.skuList) {
+    total += sku.inventory?.availableQuantity ?? 0
+  }
+  return total
+}
+
+function hasMultipleBatches(product: Product): boolean {
+  if (!product.skuList || product.skuList.length === 0) return false
+  for (const sku of product.skuList) {
+    if (sku.batches && sku.batches.length > 1) {
+      return true
+    }
+  }
+  return false
+}
+
+function getSkuDisplayName(sku: SkuItem): string {
+  if (sku.colorValue || sku.sizeValue || sku.styleValue) {
+    const parts = []
+    if (sku.colorValue) parts.push(sku.colorValue)
+    if (sku.sizeValue) parts.push(sku.sizeValue)
+    if (sku.styleValue) parts.push(sku.styleValue)
+    return parts.join('/')
+  }
+  return sku.skuName || '默认'
+}
+
 function handleImageError(event: Event) {
   const target = event.target as HTMLImageElement
   target.style.display = 'none'
@@ -291,7 +481,7 @@ async function loadProducts(reset = true) {
   }
   loading.value = true
   try {
-    const res = await listGoods({ pageNum: pageNum.value, pageSize: 24, status: 1 })
+    const res = await getGoodsList({ pageNum: pageNum.value, pageSize: 24, status: 1 })
     const list = res.rows || []
     products.value = reset ? list : [...products.value, ...list]
     hasMore.value = list.length >= 24
@@ -315,20 +505,114 @@ function selectCategory(id: string | number) {
   selectedCategory.value = id
 }
 
-function addToCart(product: any) {
-  const idx = cartItems.value.findIndex(i => i.goodsId === product.id)
+function handleSearch() {
+  console.log('搜索:', searchKeyword.value)
+}
+
+async function loadSkuInventory(sku: SkuItem) {
+  try {
+    const invRes = await getSkuInventory(sku.id)
+    if (invRes && invRes.data) {
+      sku.inventory = {
+        skuId: sku.id,
+        quantity: invRes.data.quantity || 0,
+        availableQuantity: invRes.data.availableQuantity || 0
+      }
+    }
+    
+    const batchRes = await getSkuInventoryBatches(sku.id)
+    if (batchRes && batchRes.data && batchRes.data.length > 0) {
+      sku.batches = batchRes.data.filter((b: InventoryBatch) => b.currentQty > 0)
+    }
+  } catch (e) {
+    console.error('加载SKU库存失败', e)
+  }
+}
+
+async function handleProductClick(product: Product) {
+  if (product.skuList && product.skuList.length > 1) {
+    selectedProduct.value = product
+    selectedSku.value = null
+    
+    for (const sku of product.skuList) {
+      if (!sku.inventory || !sku.batches) {
+        await loadSkuInventory(sku)
+      }
+    }
+    
+    showSkuDialog.value = true
+  } else {
+    await addToCart(product)
+  }
+}
+
+function selectSku(sku: SkuItem) {
+  selectedSku.value = sku
+}
+
+async function confirmSkuSelect() {
+  if (!selectedProduct.value || !selectedSku.value) return
+  
+  const sku = selectedSku.value
+  const product = selectedProduct.value
+  
+  const firstBatch = sku.batches && sku.batches.length > 0 ? sku.batches[0] : null
+  await addToCartWithSku(product, sku, firstBatch)
+}
+
+async function addToCart(product: Product) {
+  const sku = product.skuList?.[0]
+  if (!sku) {
+    ElMessage.error('该商品没有SKU')
+    return
+  }
+  
+  if (!sku.inventory) {
+    await loadSkuInventory(sku)
+  }
+  
+  const firstBatch = sku.batches && sku.batches.length > 0 ? sku.batches[0] : null
+  await addToCartWithSku(product, sku, firstBatch)
+}
+
+async function addToCartWithSku(product: Product, sku: SkuItem, batch?: InventoryBatch) {
+  const cartItem = {
+    goodsId: product.id,
+    skuId: sku.id,
+    name: product.name,
+    shortName: product.shortName || '',
+    skuName: sku.skuName || `${sku.colorValue || ''}${sku.sizeValue ? ' / ' + sku.sizeValue : ''}`,
+    image: product.image,
+    price: sku.retailPrice || product.retailPrice || 0,
+    barCode: batch?.barcode || sku.barCode || product.barCode,
+    skuCode: sku.skuCode,
+    batchNum: batch?.batchNum || '',
+    quantity: 1,
+  }
+  
+  addToCartWithItem(cartItem)
+  closeDialogs()
+}
+
+function closeDialogs() {
+  showSkuDialog.value = false
+  selectedProduct.value = null
+  selectedSku.value = null
+}
+
+function addToCartWithItem(item: any) {
+  const idx = cartItems.value.findIndex(i => 
+    i.goodsId === item.goodsId && i.skuId === item.skuId && i.barCode === item.barCode
+  )
   if (idx > -1) {
     cartItems.value[idx].quantity++
   } else {
-    cartItems.value.push({
-      goodsId: product.id,
-      name: product.name,
-      image: product.image,
-      price: product.retailPrice || 0,
-      quantity: 1,
-    })
+    cartItems.value.push(item)
   }
-  ElMessage.success(`已添加: ${product.name}`)
+  const name = item.shortName || item.name
+  const skuInfo = item.skuName ? ` (${item.skuName})` : ''
+  const batchInfo = item.batchNum ? ` - 批次:${item.batchNum}` : ''
+  ElMessage.success(`已添加: ${name}${skuInfo}${batchInfo}`)
 }
 
 function increaseQty(idx: number) {
@@ -376,9 +660,12 @@ async function confirmPay() {
       orderNo,
       items: cartItems.value.map(i => ({
         goodsId: i.goodsId,
+        skuId: i.skuId,
         name: i.name,
+        skuName: i.skuName,
         price: i.price,
         quantity: i.quantity,
+        barCode: i.barCode,
       })),
       payAmount: finalAmount.value,
       payMethod: selectedPay.value,
@@ -511,7 +798,7 @@ onMounted(() => {
 .product-grid {
   flex: 1;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 12px;
   padding: 16px;
   overflow-y: auto;
@@ -555,21 +842,25 @@ onMounted(() => {
   transition: all 0.2s;
   border: 1px solid #e4e7ed;
 
-  &:hover:not(.disabled) {
+  &:hover:not(.no-stock) {
     transform: translateY(-2px);
     border-color: #B4471D;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
   }
 
-  &.disabled {
-    opacity: 0.5;
+  &.has-multi {
+    border-style: dashed;
+  }
+
+  &.no-stock {
+    opacity: 0.6;
     cursor: not-allowed;
   }
 
   .product-image {
     position: relative;
     width: 100%;
-    height: 140px;
+    height: 120px;
     background: #f5f7fa;
     overflow: hidden;
 
@@ -589,44 +880,126 @@ onMounted(() => {
       display: block;
     }
 
-    .stock-badge {
+    .sku-badge {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      padding: 3px 8px;
+      background: rgba(180, 71, 29, 0.9);
+      color: #fff;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 500;
+    }
+
+    .batch-badge {
       position: absolute;
       top: 8px;
       right: 8px;
-      padding: 2px 8px;
+      padding: 3px 8px;
+      background: rgba(64, 158, 255, 0.9);
+      color: #fff;
       border-radius: 10px;
       font-size: 11px;
-      font-weight: 600;
+      font-weight: 500;
+    }
 
-      &.out {
-        background: rgba(245, 108, 108, 0.9);
-        color: #fff;
-      }
-
-      &.low {
-        background: rgba(230, 162, 60, 0.9);
-        color: #fff;
-      }
+    .no-stock-badge {
+      position: absolute;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 3px 12px;
+      background: rgba(245, 108, 108, 0.9);
+      color: #fff;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 500;
     }
   }
 
   .product-info {
-    padding: 10px 12px 12px;
+    padding: 10px;
 
     .product-name {
       font-size: 13px;
-      font-weight: 500;
+      font-weight: 600;
       color: #303133;
-      margin-bottom: 4px;
+      margin-bottom: 6px;
       overflow: hidden;
       text-overflow: ellipsis;
-      white-space: nowrap;
+      display: -webkit-box;
+      -webkit-line-clamp: 1;
+      -webkit-box-orient: vertical;
+      line-height: 18px;
+
+      .product-short-name {
+        font-weight: normal;
+        color: #606266;
+        font-size: 12px;
+      }
     }
 
-    .product-code {
-      font-size: 11px;
-      color: #909399;
+    .product-meta-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 6px;
+
+      .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 3px;
+        font-size: 11px;
+        color: #909399;
+
+        .el-icon {
+          font-size: 12px;
+        }
+      }
+    }
+
+    .product-sku-list {
       margin-bottom: 8px;
+      background: #f5f7fa;
+      border-radius: 6px;
+      padding: 6px 8px;
+
+      .sku-item-mini {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        font-size: 11px;
+        color: #606266;
+        padding: 2px 0;
+
+        .sku-name {
+          font-weight: 500;
+          color: #303133;
+        }
+
+        .sku-code {
+          color: #909399;
+        }
+
+        .sku-barcode {
+          color: #909399;
+        }
+
+        .sku-stock {
+          margin-left: auto;
+          color: #67c23a;
+
+          &.low-stock {
+            color: #f56c6c;
+          }
+        }
+      }
+
+      .sku-more {
+        font-size: 10px;
+        color: #909399;
+        padding-top: 2px;
+      }
     }
 
     .product-bottom {
@@ -634,10 +1007,32 @@ onMounted(() => {
       justify-content: space-between;
       align-items: center;
 
-      .price {
-        font-size: 16px;
-        font-weight: 700;
-        color: #B4471D;
+      .price-info {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+
+        .price {
+          font-size: 16px;
+          font-weight: 700;
+          color: #B4471D;
+        }
+
+        .total-stock {
+          display: flex;
+          align-items: center;
+          gap: 2px;
+          font-size: 11px;
+          color: #67c23a;
+
+          .el-icon {
+            font-size: 12px;
+          }
+
+          &.low-stock {
+            color: #f56c6c;
+          }
+        }
       }
 
       .add-btn {
@@ -739,7 +1134,7 @@ onMounted(() => {
 
   .cart-item {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 10px;
     padding: 10px;
     background: #f5f7fa;
@@ -786,12 +1181,39 @@ onMounted(() => {
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
+        margin-bottom: 4px;
+
+        .item-full-name {
+          font-size: 11px;
+          color: #909399;
+          margin-left: 4px;
+        }
+      }
+
+      .item-sku-row {
+        display: flex;
+        gap: 6px;
+        font-size: 11px;
+        color: #606266;
+        margin-bottom: 2px;
+
+        .item-sku-code {
+          color: #909399;
+        }
+      }
+
+      .item-meta-row {
+        display: flex;
+        gap: 8px;
+        font-size: 11px;
+        color: #909399;
+        margin-bottom: 2px;
       }
 
       .item-price {
-        font-size: 12px;
-        color: #909399;
-        margin-top: 2px;
+        font-size: 14px;
+        font-weight: 600;
+        color: #B4471D;
       }
     }
 
@@ -799,6 +1221,7 @@ onMounted(() => {
       display: flex;
       align-items: center;
       gap: 6px;
+      margin-top: 12px;
 
       :deep(.el-button) {
         width: 24px;
@@ -920,6 +1343,225 @@ onMounted(() => {
 
     &:disabled {
       background: #dcdfe6;
+    }
+  }
+}
+
+.sku-dialog, .batch-dialog {
+  :deep(.el-dialog) {
+    border-radius: 16px;
+    background: #ffffff;
+  }
+}
+
+.sku-dialog {
+  .sku-dialog-body {
+    .product-preview {
+      display: flex;
+      gap: 16px;
+      padding: 16px;
+      background: #f5f7fa;
+      border-radius: 12px;
+      margin-bottom: 20px;
+
+      img {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 8px;
+      }
+
+      .preview-info {
+        flex: 1;
+
+        h3 {
+          font-size: 16px;
+          font-weight: 600;
+          color: #303133;
+          margin: 0 0 8px 0;
+        }
+
+        .preview-meta {
+          font-size: 13px;
+          color: #606266;
+
+          span {
+            margin-right: 16px;
+          }
+        }
+      }
+    }
+
+    .sku-list {
+      max-height: 350px;
+      overflow-y: auto;
+
+      &::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      .sku-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 14px 16px;
+        border: 2px solid #e4e7ed;
+        border-radius: 10px;
+        margin-bottom: 10px;
+        cursor: pointer;
+        transition: all 0.2s;
+
+        &:hover:not(.no-stock) {
+          border-color: #dcdfe6;
+        }
+
+        &.active {
+          border-color: #B4471D;
+          background: rgba(180, 71, 29, 0.05);
+        }
+
+        &.no-stock {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+
+        .sku-info {
+          flex: 1;
+
+          .sku-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: #303133;
+            margin-bottom: 6px;
+          }
+
+          .sku-meta {
+            font-size: 12px;
+            color: #909399;
+            margin-bottom: 6px;
+
+            span {
+              margin-right: 12px;
+            }
+          }
+
+          .sku-stock-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 12px;
+
+            .stock-item {
+              display: flex;
+              align-items: center;
+              gap: 4px;
+              color: #67c23a;
+
+              .el-icon {
+                font-size: 14px;
+              }
+            }
+
+            .batch-indicator {
+              padding: 2px 8px;
+              background: #ecf5ff;
+              color: #409eff;
+              border-radius: 10px;
+              font-size: 11px;
+            }
+          }
+        }
+
+        .sku-price {
+          font-size: 18px;
+          font-weight: 600;
+          color: #B4471D;
+        }
+      }
+    }
+  }
+}
+
+.batch-dialog {
+  .batch-dialog-body {
+    .batch-product-info {
+      padding: 12px 16px;
+      background: #f5f7fa;
+      border-radius: 8px;
+      margin-bottom: 16px;
+
+      .batch-product-name {
+        font-size: 14px;
+        font-weight: 600;
+        color: #303133;
+      }
+
+      .batch-product-sku {
+        font-size: 13px;
+        color: #606266;
+      }
+    }
+
+    .batch-list {
+      max-height: 350px;
+      overflow-y: auto;
+
+      &::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      .batch-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 16px;
+        border: 2px solid #e4e7ed;
+        border-radius: 10px;
+        margin-bottom: 10px;
+        cursor: pointer;
+        transition: all 0.2s;
+
+        &:hover:not(.no-stock) {
+          border-color: #dcdfe6;
+        }
+
+        &.active {
+          border-color: #B4471D;
+          background: rgba(180, 71, 29, 0.05);
+        }
+
+        &.no-stock {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+
+        .batch-info {
+          .batch-barcode {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            color: #303133;
+            margin-bottom: 6px;
+
+            .el-icon {
+              color: #909399;
+            }
+          }
+
+          .batch-details {
+            display: flex;
+            gap: 16px;
+            font-size: 12px;
+            color: #606266;
+          }
+        }
+
+        .batch-select {
+          flex-shrink: 0;
+        }
+      }
     }
   }
 }
