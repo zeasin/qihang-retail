@@ -550,10 +550,10 @@ sys_dept         ← 部门
 
 ```bash
 # 创建数据库
-mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS \`qihang-erp\` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS \`qihang-retail\` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 
 # 导入数据表结构
-mysql -u root -p qihang-erp < docs/qihang-retail.sql
+mysql -u root -p qihang-retail < docs/qihang-retail.sql
 ```
 
 ### 7.3 启动后端
@@ -607,7 +607,7 @@ spring:
 spring:
   datasource:
     driverClassName: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://127.0.0.1:3306/qihang-erp?useUnicode=true&characterEncoding=utf8&serverTimezone=GMT%2B8
+    url: jdbc:mysql://127.0.0.1:3306/qihang-retail?useUnicode=true&characterEncoding=utf8&serverTimezone=GMT%2B8
     username: root
     password: your_password
     hikari:

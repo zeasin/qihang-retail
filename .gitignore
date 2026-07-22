@@ -38,8 +38,7 @@ build/
 .DS_Store
 .qoder
 
-# AI Agent 配置（本地开发使用，无需提交）
-AGENTS.md
+
 .aider*
 docs/TEST-REPORT-20260715.md
 docs/AI-IMPLEMENTATION-PLAN.md
