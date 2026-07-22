@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.qihangerp.mapper.ErpMerchantGoodsPriceMapper">
+
+    <resultMap id="BaseResultMap" type="cn.qihangerp.model.entity.ErpMerchantGoodsPrice">
+            <id property="id" column="id" />
+            <result property="merchantId" column="merchant_id" />
+            <result property="shopPlatformId" column="shop_platform_id" />
+            <result property="goodsId" column="goods_id" />
+            <result property="goodsSkuId" column="goods_sku_id" />
+            <result property="purPrice" column="pur_price" />
+            <result property="retailPrice" column="retail_price" />
+            <result property="remark" column="remark" />
+            <result property="status" column="status" />
+            <result property="createBy" column="create_by" />
+            <result property="createTime" column="create_time" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,merchant_id,shop_platform_id,pur_price,retail_price,remark,goods_id,goods_sku_id
+        status,create_by,create_time
+    </sql>
+</mapper>

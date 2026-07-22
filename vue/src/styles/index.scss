@@ -1,0 +1,69 @@
+@use 'sidebar';
+@use 'transition';
+
+:root {
+  --el-input-height: 36px;
+  --el-select-input-height: 36px;
+}
+
+.el-input--small .el-input__wrapper,
+.el-select--small .el-select__wrapper {
+  height: 32px;
+}
+.el-date-editor.el-input--small .el-input__wrapper {
+  height: 32px;
+}
+
+.el-form-item--small .el-form-item__label {
+  line-height: 32px;
+}
+.el-form-item--small .el-form-item__content {
+  line-height: 32px;
+}
+
+.el-form--inline .el-select {
+  min-width: 200px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  height: 100%;
+  font-family: 'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', Arial, sans-serif;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+}
+
+.app-container {
+  padding: 20px;
+}
+
+.link-type,
+.link-type:focus {
+  color: #337ab7;
+  cursor: pointer;
+}
+.link-type:hover {
+  color: rgb(32, 160, 255);
+}
+
+.mb8 {
+  margin-bottom: 8px;
+}
+
+.tree-border {
+  margin-top: 5px;
+  border: 1px solid #e5e6e7;
+  background: #fff;
+  border-radius: 4px;
+}
+
+.head-container {
+  padding-bottom: 10px;
+}

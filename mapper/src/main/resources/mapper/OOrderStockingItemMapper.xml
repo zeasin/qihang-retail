@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.qihangerp.mapper.OOrderStockingItemMapper">
+
+    <resultMap id="BaseResultMap" type="cn.qihangerp.model.entity.OOrderStockingItem">
+            <id property="id" column="id" jdbcType="BIGINT"/>
+            <result property="shipOrderId" column="ship_order_id" jdbcType="BIGINT"/>
+            <result property="orderNum" column="order_num" jdbcType="VARCHAR"/>
+            <result property="subOrderNum" column="sub_order_num" jdbcType="VARCHAR"/>
+            <result property="orderTime" column="order_time" jdbcType="TIMESTAMP"/>
+            <result property="oOrderId" column="o_order_id" jdbcType="BIGINT"/>
+            <result property="oOrderItemId" column="o_order_item_id" jdbcType="BIGINT"/>
+            <result property="supplierId" column="supplier_id" jdbcType="BIGINT"/>
+            <result property="skuId" column="sku_id" jdbcType="VARCHAR"/>
+            <result property="goodsId" column="goods_id" jdbcType="BIGINT"/>
+            <result property="goodsSkuId" column="goods_sku_id" jdbcType="BIGINT"/>
+            <result property="goodsName" column="goods_name" jdbcType="VARCHAR"/>
+            <result property="goodsImg" column="goods_img" jdbcType="VARCHAR"/>
+            <result property="goodsNum" column="goods_num" jdbcType="VARCHAR"/>
+            <result property="skuName" column="sku_name" jdbcType="VARCHAR"/>
+            <result property="skuCode" column="sku_code" jdbcType="VARCHAR"/>
+            <result property="barcode" column="barcode" jdbcType="VARCHAR"/>
+            <result property="quantity" column="quantity" jdbcType="INTEGER"/>
+            <result property="remark" column="remark" jdbcType="VARCHAR"/>
+            <result property="sendStatus" column="send_status" jdbcType="INTEGER"/>
+            <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+            <result property="createBy" column="create_by" jdbcType="VARCHAR"/>
+            <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
+            <result property="updateBy" column="update_by" jdbcType="VARCHAR"/>
+            <result property="productId" column="product_id" jdbcType="VARCHAR"/>
+            <result property="waybillCode" column="waybill_code" jdbcType="VARCHAR"/>
+            <result property="waybillStatus" column="waybill_status" jdbcType="INTEGER"/>
+            <result property="refundStatus" column="refund_status" jdbcType="INTEGER"/>
+        <result property="stockingStatus" column="stocking_status" jdbcType="INTEGER"/>
+        <result property="warehouseType" column="warehouse_type" jdbcType="INTEGER"/>
+        <result property="warehouseId" column="warehouse_id" jdbcType="INTEGER"/>
+        <result property="warehouseName" column="warehouse_name" jdbcType="VARCHAR"/>
+        <result property="merchantId" column="merchant_id" jdbcType="BIGINT"/>
+        <result property="unshippedQuantity" column="unshipped_quantity" jdbcType="INTEGER"/>
+        <result property="warehouseGoodsId" column="warehouse_goods_id" jdbcType="BIGINT"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,ship_order_id,order_num,waybill_code,waybill_status,
+        o_order_id,supplier_id,sku_id,product_id,order_time,
+        goods_id,goods_sku_id,goods_name,sub_order_num,
+        goods_img,goods_num,sku_name,o_order_item_id,barcode,
+        sku_code,quantity,remark,refund_status,
+        send_status,create_time,create_by,unshipped_quantity,warehouse_goods_id,
+        update_time,update_by,stocking_status,merchant_id,warehouse_type,warehouse_id,warehouse_name
+    </sql>
+</mapper>

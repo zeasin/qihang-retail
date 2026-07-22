@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.qihangerp.mapper.OOrderStockingItemBatchMapper">
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="cn.qihangerp.model.entity.OOrderStockingItemBatch">
+        <id column="id" property="id"/>
+        <result column="order_stocking_item_id" property="orderStockingItemId"/>
+        <result column="order_stocking_id" property="orderStockingId"/>
+        <result column="merchant_id" property="merchantId"/>
+        <result column="shop_id" property="shopId"/>
+        <result column="order_id" property="orderId"/>
+        <result column="order_item_id" property="orderItemId"/>
+        <result column="batch_id" property="batchId"/>
+        <result column="batch_num" property="batchNum"/>
+        <result column="inventory_id" property="inventoryId"/>
+        <result column="goods_id" property="goodsId"/>
+        <result column="goods_no" property="goodsNo"/>
+        <result column="quantity" property="quantity"/>
+        <result column="unit_cost" property="unitCost"/>
+        <result column="total_cost" property="totalCost"/>
+        <result column="warehouse_id" property="warehouseId"/>
+        <result column="warehouse_type" property="warehouseType"/>
+        <result column="inventory_mode" property="inventoryMode"/>
+        <result column="barcode" property="barcode"/>
+        <result column="actual_gold_weight" property="actualGoldWeight"/>
+        <result column="actual_silver_weight" property="actualSilverWeight"/>
+        <result column="labor_cost" property="laborCost"/>
+        <result column="certificate_no" property="certificateNo"/>
+        <result column="pur_price" property="purPrice"/>
+        <result column="create_time" property="createTime"/>
+        <result column="create_by" property="createBy"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="update_by" property="updateBy"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, order_stocking_item_id, order_stocking_id, merchant_id, shop_id, order_id, order_item_id, batch_id, batch_num, 
+        inventory_id, goods_id, goods_no, quantity, unit_cost, total_cost, warehouse_id, warehouse_type, inventory_mode, 
+        barcode, actual_gold_weight, actual_silver_weight, labor_cost, certificate_no, pur_price, 
+        create_time, create_by, update_time, update_by
+    </sql>
+
+    <!-- 根据发货备货明细ID查询批次列表 -->
+    <select id="getBatchListByOrderStockingItemId" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        o_order_stocking_item_batch
+        WHERE
+        order_stocking_item_id = #{orderStockingItemId}
+    </select>
+
+    <!-- 根据发货备货ID查询批次列表 -->
+    <select id="getBatchListByOrderStockingId" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        o_order_stocking_item_batch
+        WHERE
+        order_stocking_id = #{orderStockingId}
+    </select>
+</mapper>

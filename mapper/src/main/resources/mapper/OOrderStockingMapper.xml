@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.qihangerp.mapper.OOrderStockingMapper">
+
+    <resultMap id="BaseResultMap" type="cn.qihangerp.model.entity.OOrderStocking">
+            <id property="id" column="id" jdbcType="BIGINT"/>
+            <result property="shipperId" column="shipper_id" jdbcType="BIGINT"/>
+            <result property="type" column="type" jdbcType="INTEGER"/>
+            <result property="orderType" column="order_type" jdbcType="INTEGER"/>
+            <result property="shipMode" column="ship_mode" jdbcType="INTEGER"/>
+            <result property="oOrderId" column="o_order_id" jdbcType="BIGINT"/>
+            <result property="orderNum" column="order_num" jdbcType="VARCHAR"/>
+            <result property="orderTime" column="order_time" jdbcType="TIMESTAMP"/>
+            <result property="shopType" column="shop_type" jdbcType="BIGINT"/>
+            <result property="shopId" column="shop_id" jdbcType="BIGINT"/>
+            <result property="remark" column="remark" jdbcType="VARCHAR"/>
+            <result property="buyerMemo" column="buyer_memo" jdbcType="VARCHAR"/>
+            <result property="sellerMemo" column="seller_memo" jdbcType="VARCHAR"/>
+            <result property="sendStatus" column="send_status" jdbcType="INTEGER"/>
+            <result property="shippingTime" column="shipping_time" jdbcType="TIMESTAMP"/>
+            <result property="shippingOrderCode" column="shipping_order_code" jdbcType="VARCHAR"/>
+            <result property="shippingErpOrderCode" column="shipping_erp_order_code" jdbcType="VARCHAR"/>
+            <result property="shippingNumber" column="shipping_number" jdbcType="VARCHAR"/>
+            <result property="shippingCompany" column="shipping_company" jdbcType="VARCHAR"/>
+            <result property="shippingCompanyCode" column="shipping_company_code" jdbcType="VARCHAR"/>
+            <result property="shippingMan" column="shipping_man" jdbcType="VARCHAR"/>
+            <result property="shippingCost" column="shipping_cost" jdbcType="DECIMAL"/>
+            <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+            <result property="createBy" column="create_by" jdbcType="VARCHAR"/>
+            <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
+            <result property="updateBy" column="update_by" jdbcType="VARCHAR"/>
+            <result property="province" column="province" jdbcType="VARCHAR"/>
+            <result property="city" column="city" jdbcType="VARCHAR"/>
+            <result property="town" column="town" jdbcType="VARCHAR"/>
+            <result property="address" column="address" jdbcType="VARCHAR"/>
+            <result property="receiverName" column="receiver_name" jdbcType="VARCHAR"/>
+            <result property="receiverMobile" column="receiver_mobile" jdbcType="VARCHAR"/>
+            <result property="waybillStatus" column="waybill_status" jdbcType="INTEGER"/>
+            <result property="waybillCode" column="waybill_code" jdbcType="VARCHAR"/>
+            <result property="waybillOrderId" column="waybill_order_id" jdbcType="VARCHAR"/>
+            <result property="waybillCompany" column="waybill_company" jdbcType="VARCHAR"/>
+            <result property="orderStatus" column="order_status" jdbcType="INTEGER"/>
+            <result property="stockingStatus" column="stocking_status" jdbcType="INTEGER"/>
+            <result property="warehouseType" column="warehouse_type" jdbcType="INTEGER"/>
+            <result property="warehouseId" column="warehouse_id" jdbcType="INTEGER"/>
+            <result property="warehouseName" column="warehouse_name" jdbcType="VARCHAR"/>
+            <result property="warehouseNo" column="warehouse_no" jdbcType="VARCHAR"/>
+            <result property="shipperNo" column="shipper_no" jdbcType="VARCHAR"/>
+            <result property="shopNo" column="shop_no" jdbcType="VARCHAR"/>
+            <result property="platformNo" column="platform_no" jdbcType="VARCHAR"/>
+        <result property="merchantId" column="merchant_id" jdbcType="BIGINT"/>
+        <result property="erpPushStatus" column="erp_push_status" jdbcType="INTEGER"/>
+        <result property="erpPushResult" column="erp_push_result" jdbcType="VARCHAR"/>
+        <result property="erpPushParam1" column="erp_push_param1" jdbcType="VARCHAR"/>
+        <result property="erpPushParam2" column="erp_push_param2" jdbcType="VARCHAR"/>
+        <result property="erpPushParam3" column="erp_push_param3" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,shipper_id,o_order_id,waybill_code,waybill_status,waybill_order_id,type,order_type,
+        order_num,order_time,shop_type,waybill_company,
+        shop_id,remark,buyer_memo,order_status,
+        seller_memo,send_status,shipping_time,shipping_order_code,shipping_erp_order_code,
+        shipping_number,shipping_company,shipping_company_code,shipping_man,
+        shipping_cost,create_time,create_by,
+        update_time,update_by,ship_mode,
+        province,city,town,address,receiver_name,receiver_mobile,
+          stocking_status,merchant_id,warehouse_type,warehouse_id,warehouse_name,
+          erp_push_status,erp_push_result,erp_push_param1,erp_push_param2,erp_push_param3,
+          platform_no,shop_no,shipper_no,warehouse_no
+    </sql>
+</mapper>

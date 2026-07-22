@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.qihangerp.mapper.OMarketingDiscountRuleMapper">
+
+    <resultMap id="BaseResultMap" type="cn.qihangerp.model.entity.OMarketingDiscountRule">
+            <id property="id" column="id" />
+            <result property="ruleName" column="rule_name" />
+            <result property="discountType" column="discount_type" />
+            <result property="discountValue" column="discount_value" />
+            <result property="applyScope" column="apply_scope" />
+            <result property="applyMerchantId" column="apply_merchant_id" />
+            <result property="applyMerchantName" column="apply_merchant_name" />
+            <result property="applyShopId" column="apply_shop_id" />
+            <result property="applyShopName" column="apply_shop_name" />
+            <result property="totalQuota" column="total_quota" />
+            <result property="usedQuota" column="used_quota" />
+            <result property="sourceType" column="source_type" />
+            <result property="sourceId" column="source_id" />
+            <result property="minOrderAmount" column="min_order_amount" />
+            <result property="startTime" column="start_time" />
+            <result property="endTime" column="end_time" />
+            <result property="status" column="status" />
+            <result property="priority" column="priority" />
+            <result property="createdBy" column="created_by" />
+            <result property="createdTime" column="created_time" />
+            <result property="updatedTime" column="updated_time" />
+            <result property="remark" column="remark" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,rule_name,discount_type,discount_value,apply_scope,apply_merchant_id,apply_merchant_name,apply_shop_id,apply_shop_name,
+        total_quota,used_quota,source_type,source_id,min_order_amount,
+        start_time,end_time,status,priority,created_by,apply_target_name,
+        created_time,updated_time,remark
+    </sql>
+</mapper>

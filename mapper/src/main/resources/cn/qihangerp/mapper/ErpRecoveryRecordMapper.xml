@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.qihangerp.mapper.ErpRecoveryRecordMapper">
+
+    <resultMap id="BaseResultMap" type="cn.qihangerp.model.entity.ErpRecoveryRecord">
+            <id property="id" column="id" />
+            <result property="recoveryNo" column="recovery_no" />
+            <result property="customerId" column="customer_id" />
+            <result property="customerName" column="customer_name" />
+            <result property="customerPhone" column="customer_phone" />
+            <result property="customerAddress" column="customer_address" />
+            <result property="merchantId" column="merchant_id" />
+            <result property="merchantName" column="merchant_name" />
+            <result property="shopId" column="shop_id" />
+            <result property="shopName" column="shop_name" />
+            <result property="recoveryDate" column="recovery_date" />
+            <result property="goldWeight" column="gold_weight" />
+            <result property="goldPrice" column="gold_price" />
+            <result property="silverWeight" column="silver_weight" />
+            <result property="silverPrice" column="silver_price" />
+            <result property="totalAmount" column="total_amount" />
+            <result property="settlementType" column="settlement_type" />
+            <result property="cashAmount" column="cash_amount" />
+            <result property="deductedAmount" column="deducted_amount" />
+            <result property="remainingAmount" column="remaining_amount" />
+            <result property="status" column="status" />
+            <result property="settlementStatus" column="settlement_status" />
+            <result property="originalOrderId" column="original_order_id" />
+            <result property="originalOrderNo" column="original_order_no" />
+            <result property="remark" column="remark" />
+            <result property="createdBy" column="created_by" />
+            <result property="createdTime" column="created_time" />
+            <result property="updatedTime" column="updated_time" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,recovery_no,customer_id,customer_name,customer_phone,customer_address,merchant_id,shop_id,recovery_date,
+        gold_weight,gold_price,silver_weight,silver_price,total_amount,shop_name,merchant_name,
+        settlement_type,cash_amount,deducted_amount,remaining_amount,status,
+        settlement_status,original_order_id,original_order_no,remark,created_by,created_time,
+        updated_time
+    </sql>
+</mapper>

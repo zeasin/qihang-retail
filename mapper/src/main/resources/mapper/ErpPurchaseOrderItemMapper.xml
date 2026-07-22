@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.qihangerp.mapper.ErpPurchaseOrderItemMapper">
+
+    <resultMap id="BaseResultMap" type="cn.qihangerp.model.entity.ErpPurchaseOrderItem">
+            <id property="id" column="id" jdbcType="BIGINT"/>
+            <result property="orderId" column="order_id" jdbcType="BIGINT"/>
+            <result property="merchantId" column="merchant_id" jdbcType="BIGINT"/>
+            <result property="shopId" column="shop_id" jdbcType="BIGINT"/>
+            <result property="orderNum" column="order_num" jdbcType="VARCHAR"/>
+            <result property="transType" column="trans_type" jdbcType="CHAR"/>
+            <result property="amount" column="amount" jdbcType="DOUBLE"/>
+            <result property="orderDate" column="order_date" jdbcType="DATE"/>
+            <result property="remark" column="remark" jdbcType="VARCHAR"/>
+            <result property="goodsId" column="goods_id" jdbcType="BIGINT"/>
+            <result property="goodsNum" column="goods_num" jdbcType="VARCHAR"/>
+            <result property="goodsName" column="goods_name" jdbcType="VARCHAR"/>
+            <result property="specId" column="spec_id" jdbcType="BIGINT"/>
+            <result property="specNum" column="spec_num" jdbcType="VARCHAR"/>
+            <result property="colorValue" column="color_value" jdbcType="VARCHAR"/>
+            <result property="colorImage" column="color_image" jdbcType="VARCHAR"/>
+            <result property="sizeValue" column="size_value" jdbcType="VARCHAR"/>
+            <result property="styleValue" column="style_value" jdbcType="VARCHAR"/>
+            <result property="price" column="price" jdbcType="DECIMAL"/>
+            <result property="disAmount" column="dis_amount" jdbcType="DECIMAL"/>
+            <result property="disRate" column="dis_rate" jdbcType="DECIMAL"/>
+            <result property="quantity" column="quantity" jdbcType="BIGINT"/>
+            <result property="inqty" column="inQty" jdbcType="BIGINT"/>
+            <result property="locationid" column="locationId" jdbcType="INTEGER"/>
+            <result property="isDelete" column="is_delete" jdbcType="TINYINT"/>
+            <result property="status" column="status" jdbcType="INTEGER"/>
+            <result property="inventoryMode" column="inventory_mode" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,order_id,order_num,
+        trans_type,amount,order_date,
+        remark,goods_id,goods_num,
+        goods_name,spec_id,spec_num,
+        color_value,color_image,size_value,
+        style_value,price,dis_amount,
+        dis_rate,quantity,inQty,shop_id,merchant_id,
+        locationId,is_delete,status,inventory_mode
+    </sql>
+</mapper>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.qihangerp.mapper.ErpRecoveryDeductionMapper">
+
+    <resultMap id="BaseResultMap" type="cn.qihangerp.model.entity.ErpRecoveryDeduction">
+            <id property="id" column="id" />
+            <result property="recoveryId" column="recovery_id" />
+            <result property="orderId" column="order_id" />
+            <result property="deductionAmount" column="deduction_amount" />
+            <result property="deductionTime" column="deduction_time" />
+            <result property="createdBy" column="created_by" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,recovery_id,order_id,deduction_amount,deduction_time,created_by
+    </sql>
+</mapper>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.qihangerp.mapper.ErpPurchaseOrderMapper">
+
+    <resultMap id="BaseResultMap" type="cn.qihangerp.model.entity.ErpPurchaseOrder">
+            <id property="id" column="id" jdbcType="BIGINT"/>
+            <result property="supplierId" column="supplier_id" jdbcType="BIGINT"/>
+            <result property="orderNum" column="order_num" jdbcType="VARCHAR"/>
+            <result property="orderDate" column="order_date" jdbcType="DATE"/>
+            <result property="orderTime" column="order_time" jdbcType="BIGINT"/>
+            <result property="orderAmount" column="order_amount" jdbcType="DECIMAL"/>
+            <result property="shipAmount" column="ship_amount" jdbcType="DECIMAL"/>
+            <result property="remark" column="remark" jdbcType="VARCHAR"/>
+            <result property="status" column="status" jdbcType="TINYINT"/>
+            <result property="auditUser" column="audit_user" jdbcType="VARCHAR"/>
+            <result property="auditTime" column="audit_time" jdbcType="BIGINT"/>
+            <result property="supplierConfirmTime" column="supplier_confirm_time" jdbcType="TIMESTAMP"/>
+            <result property="supplierDeliveryTime" column="supplier_delivery_time" jdbcType="TIMESTAMP"/>
+            <result property="receivedTime" column="received_time" jdbcType="TIMESTAMP"/>
+            <result property="stockInTime" column="stock_in_time" jdbcType="TIMESTAMP"/>
+            <result property="createBy" column="create_by" jdbcType="VARCHAR"/>
+            <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+            <result property="updateBy" column="update_by" jdbcType="VARCHAR"/>
+            <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
+            <result property="merchantId" column="merchant_id" jdbcType="BIGINT"/>
+            <result property="shopId" column="shop_id" jdbcType="BIGINT"/>
+            <result property="warehouseId" column="warehouse_id" jdbcType="BIGINT"/>
+            <result property="warehouseName" column="warehouse_name" jdbcType="VARCHAR"/>
+            <result property="warehouseType" column="warehouse_type" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,supplier_id,order_num,
+        order_date,order_time,order_amount,
+        ship_amount,remark,status,
+        audit_user,audit_time,supplier_confirm_time,
+        supplier_delivery_time,received_time,stock_in_time,shop_id,
+        create_by,create_time,update_by,update_time,merchant_id,warehouse_id,warehouse_type,warehouse_name
+    </sql>
+</mapper>
