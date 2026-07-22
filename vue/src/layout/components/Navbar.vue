@@ -3,6 +3,9 @@
     <hamburger :is-active="sidebar.opened" class="hamburger-container" @toggle-click="toggleSideBar" />
     <breadcrumb class="breadcrumb-container" />
     <div class="right-menu">
+      <el-button type="primary" :icon="Shop" @click="goPos" class="pos-entry">
+        POS收银
+      </el-button>
       <el-popover placement="bottom" :width="360" trigger="click" @show="loadNotifs">
         <template #reference>
           <el-badge :value="unreadCount" :hidden="unreadCount === 0" class="notif-badge" :max="99">
@@ -59,7 +62,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessageBox } from 'element-plus'
-import { ArrowDown, Bell } from '@element-plus/icons-vue'
+import { ArrowDown, Bell, Shop } from '@element-plus/icons-vue'
 import { useAppStore } from '@/store/modules/app'
 import { useUserStore } from '@/store/modules/user'
 import { getUnreadMessages, markMessageRead, markAllMessagesRead } from '@/api/sys/message'
@@ -162,6 +165,10 @@ function toggleSideBar() {
   appStore.toggleSidebar()
 }
 
+function goPos() {
+  router.push('/pos')
+}
+
 async function logout() {
   await ElMessageBox.confirm('确定注销并退出系统吗？', '提示', {
     confirmButtonText: '确定',
@@ -199,6 +206,16 @@ async function logout() {
     align-items: center;
     margin-right: 20px;
     gap: 16px;
+
+    .pos-entry {
+      background: linear-gradient(135deg, #B4471D, #D96A3F);
+      border: none;
+      box-shadow: 0 2px 8px rgba(180, 71, 29, 0.3);
+
+      &:hover {
+        background: linear-gradient(135deg, #A33E18, #C85A2E);
+      }
+    }
 
     .notif-badge {
       cursor: pointer;

@@ -1,0 +1,174 @@
+$pos-bg-primary: #0D0A0A;
+$pos-bg-secondary: #1A1716;
+$pos-bg-card: #24211F;
+$pos-bg-hover: #2D2926;
+$pos-bg-input: #1F1C1A;
+
+$pos-text-primary: #C7C9CB;
+$pos-text-secondary: #81807F;
+$pos-text-muted: #5E6266;
+$pos-text-white: #FFFFFF;
+
+$pos-accent-primary: #951605;
+$pos-accent-secondary: #B4471D;
+$pos-accent-hover: #C55A2A;
+$pos-accent-dark: #661B12;
+
+$pos-border: #2D2926;
+$pos-border-light: #3D3936;
+
+$pos-success: #67C23A;
+$pos-warning: #E6A23C;
+$pos-error: #F56C6C;
+$pos-info: #909399;
+
+$pos-radius-sm: 6px;
+$pos-radius-md: 10px;
+$pos-radius-lg: 14px;
+
+$pos-spacing-xs: 4px;
+$pos-spacing-sm: 8px;
+$pos-spacing-md: 12px;
+$pos-spacing-lg: 16px;
+$pos-spacing-xl: 24px;
+
+$pos-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+$pos-shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+$pos-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+
+:root {
+  --pos-bg-primary: #{$pos-bg-primary};
+  --pos-bg-secondary: #{$pos-bg-secondary};
+  --pos-bg-card: #{$pos-bg-card};
+  --pos-bg-hover: #{$pos-bg-hover};
+  --pos-bg-input: #{$pos-bg-input};
+  
+  --pos-text-primary: #{$pos-text-primary};
+  --pos-text-secondary: #{$pos-text-secondary};
+  --pos-text-muted: #{$pos-text-muted};
+  --pos-text-white: #{$pos-text-white};
+  
+  --pos-accent-primary: #{$pos-accent-primary};
+  --pos-accent-secondary: #{$pos-accent-secondary};
+  --pos-accent-hover: #{$pos-accent-hover};
+  --pos-accent-dark: #{$pos-accent-dark};
+  
+  --pos-border: #{$pos-border};
+  --pos-border-light: #{$pos-border-light};
+  
+  --pos-success: #{$pos-success};
+  --pos-warning: #{$pos-warning};
+  --pos-error: #{$pos-error};
+  --pos-info: #{$pos-info};
+  
+  --pos-radius-sm: #{$pos-radius-sm};
+  --pos-radius-md: #{$pos-radius-md};
+  --pos-radius-lg: #{$pos-radius-lg};
+  
+  --pos-spacing-xs: #{$pos-spacing-xs};
+  --pos-spacing-sm: #{$pos-spacing-sm};
+  --pos-spacing-md: #{$pos-spacing-md};
+  --pos-spacing-lg: #{$pos-spacing-lg};
+  --pos-spacing-xl: #{$pos-spacing-xl};
+  
+  --pos-shadow-sm: #{$pos-shadow-sm};
+  --pos-shadow-md: #{$pos-shadow-md};
+  --pos-shadow-lg: #{$pos-shadow-lg};
+}
+
+.pos-container {
+  background-color: var(--pos-bg-primary);
+  color: var(--pos-text-primary);
+  min-height: 100vh;
+  font-family: 'Helvetica Neue', Helvetica, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+}
+
+.pos-card {
+  background-color: var(--pos-bg-card);
+  border-radius: var(--pos-radius-md);
+  border: 1px solid var(--pos-border);
+  transition: all 0.2s ease;
+}
+
+.pos-btn {
+  background-color: var(--pos-accent-secondary);
+  color: var(--pos-text-white);
+  border: none;
+  border-radius: var(--pos-radius-md);
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background-color: var(--pos-accent-hover);
+    transform: translateY(-1px);
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+.pos-btn-outline {
+  background-color: transparent;
+  color: var(--pos-text-primary);
+  border: 1px solid var(--pos-border-light);
+  
+  &:hover {
+    background-color: var(--pos-bg-hover);
+    border-color: var(--pos-accent-secondary);
+  }
+}
+
+.pos-input {
+  background-color: var(--pos-bg-input);
+  border: 1px solid var(--pos-border);
+  border-radius: var(--pos-radius-md);
+  padding: 12px 16px;
+  color: var(--pos-text-primary);
+  font-size: 14px;
+  transition: all 0.2s ease;
+  width: 100%;
+  
+  &:focus {
+    outline: none;
+    border-color: var(--pos-accent-secondary);
+    box-shadow: 0 0 0 3px rgba(180, 71, 29, 0.2);
+  }
+  
+  &::placeholder {
+    color: var(--pos-text-muted);
+  }
+}
+
+.pos-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 8px;
+  border-radius: var(--pos-radius-sm);
+  font-size: 12px;
+  font-weight: 500;
+  
+  &.success {
+    background-color: rgba(103, 194, 58, 0.15);
+    color: var(--pos-success);
+  }
+  
+  &.warning {
+    background-color: rgba(230, 162, 60, 0.15);
+    color: var(--pos-warning);
+  }
+  
+  &.error {
+    background-color: rgba(245, 108, 108, 0.15);
+    color: var(--pos-error);
+  }
+  
+  &.info {
+    background-color: rgba(144, 147, 153, 0.15);
+    color: var(--pos-info);
+  }
+}

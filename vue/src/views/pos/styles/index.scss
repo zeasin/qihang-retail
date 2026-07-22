@@ -1,0 +1,64 @@
+@import './pos-theme.scss';
+
+.pos-layout {
+  .el-message-box {
+    background: var(--pos-bg-secondary) !important;
+    border-radius: 16px;
+    
+    .el-message-box__title {
+      color: var(--pos-text-primary);
+    }
+    
+    .el-message-box__message {
+      color: var(--pos-text-secondary);
+    }
+    
+    .el-button--primary {
+      background: var(--pos-accent-secondary);
+      border: none;
+      
+      &:hover {
+        background: var(--pos-accent-hover);
+      }
+    }
+    
+    .el-button--default {
+      background: transparent;
+      border-color: var(--pos-border-light);
+      color: var(--pos-text-primary);
+      
+      &:hover {
+        border-color: var(--pos-accent-secondary);
+        color: var(--pos-accent-secondary);
+      }
+    }
+  }
+  
+  .el-message {
+    background: var(--pos-bg-card) !important;
+    border: 1px solid var(--pos-border);
+    border-radius: 10px;
+    
+    .el-message__content {
+      color: var(--pos-text-primary);
+    }
+  }
+  
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: var(--pos-bg-secondary);
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: var(--pos-border-light);
+    border-radius: 4px;
+    
+    &:hover {
+      background: var(--pos-text-muted);
+    }
+  }
+}
