@@ -72,7 +72,7 @@ function open() {
     messages.value.push({
       sessionId: '',
       role: 'assistant',
-      content: `你好！我是启航电商ERP的AI助手，可以帮你：
+      content: `你好！我是启航零售ERP的AI助手，可以帮你：
 
 **📦 商品查询** — 搜索商品名称、SKU编码、价格、规格等信息
 

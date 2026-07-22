@@ -60,7 +60,7 @@
       </div>
     </div>
     <div class="el-login-footer">
-      <span>Copyright © 2023-2026 Qihang Ecom ERP V4.0 All Rights Reserved.</span>
+      <span>Copyright © 2023-2026 Qihang Retail ERP V1.0 All Rights Reserved.</span>
     </div>
   </div>
 </template>
