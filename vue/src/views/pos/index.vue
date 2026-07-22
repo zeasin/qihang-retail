@@ -1,31 +1,5 @@
 <template>
   <div class="pos-root">
-    <div class="pos-header">
-      <div class="header-left">
-        <el-icon :size="20" color="#B4471D"><Shop /></el-icon>
-        <span class="store-name">{{ storeInfo.name }}</span>
-      </div>
-      <div class="header-center">
-        <span class="time">{{ currentTime }}</span>
-        <span class="date">{{ currentDate }}</span>
-      </div>
-      <div class="header-right">
-        <div class="stat">
-          <span class="stat-label">今日营业额</span>
-          <span class="stat-value">¥{{ todaySales.toFixed(2) }}</span>
-        </div>
-        <div class="stat">
-          <span class="stat-label">订单数</span>
-          <span class="stat-value">{{ todayOrders }}</span>
-        </div>
-        <el-tooltip content="返回管理后台" placement="bottom">
-          <el-button class="back-btn" circle @click="goBack">
-            <el-icon><Monitor /></el-icon>
-          </el-button>
-        </el-tooltip>
-      </div>
-    </div>
-
     <div class="pos-body">
       <div class="main-area">
         <div class="toolbar">
@@ -248,24 +222,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
-  Shop, Search, Loading, Goods, Picture, Plus, Minus, Close,
-  ShoppingCart, Delete, Wallet, CreditCard, Money, CircleCheckFilled, Monitor
+  Search, Loading, Goods, Picture, Plus, Minus, Close,
+  ShoppingCart, Delete, Wallet, CreditCard, Money, CircleCheckFilled
 } from '@element-plus/icons-vue'
 import { listGoods } from '@/api/goods/goods'
 import { listCategory } from '@/api/goods/category'
-import { addOrder, listOrder } from '@/api/order/salesOrder'
-
-const router = useRouter()
-
-const storeInfo = ref({ name: '启航便利店' })
-const currentTime = ref('')
-const currentDate = ref('')
-const todaySales = ref(0)
-const todayOrders = ref(0)
+import { addOrder } from '@/api/order/salesOrder'
 
 const products = ref<any[]>([])
 const categories = ref<any[]>([])
@@ -289,8 +254,6 @@ const payMethods = [
   { key: 'card', name: '银行卡', icon: CreditCard },
 ]
 
-let timer: number
-
 const filteredProducts = computed(() => {
   let result = products.value
   if (selectedCategory.value !== 'all') {
@@ -310,12 +273,6 @@ const filteredProducts = computed(() => {
 const cartCount = computed(() => cartItems.value.reduce((s, i) => s + i.quantity, 0))
 const subtotal = computed(() => cartItems.value.reduce((s, i) => s + i.price * i.quantity, 0))
 const finalAmount = computed(() => Math.max(0, subtotal.value))
-
-function formatTime() {
-  const now = new Date()
-  currentTime.value = now.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
-  currentDate.value = now.toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit', weekday: 'short' })
-}
 
 function formatPrice(price: any) {
   if (price === null || price === undefined) return '0.00'
@@ -349,15 +306,6 @@ async function loadCategories() {
   try {
     const res = await listCategory({})
     categories.value = res.rows || []
-  } catch (e) {
-    console.error(e)
-  }
-}
-
-async function loadStats() {
-  try {
-    const res = await listOrder({ pageNum: 1, pageSize: 1 })
-    todayOrders.value = res.total || 0
   } catch (e) {
     console.error(e)
   }
@@ -437,8 +385,6 @@ async function confirmPay() {
     })
     lastOrderNo.value = orderNo
     lastOrderAmount.value = finalAmount.value
-    todaySales.value += finalAmount.value
-    todayOrders.value++
     cartItems.value = []
     showSuccessDialog.value = true
   } catch (e) {
@@ -454,20 +400,9 @@ function loadMore() {
   }
 }
 
-function goBack() {
-  router.push('/')
-}
-
 onMounted(() => {
-  formatTime()
-  timer = window.setInterval(formatTime, 1000)
   loadProducts()
   loadCategories()
-  loadStats()
-})
-
-onUnmounted(() => {
-  if (timer) clearInterval(timer)
 })
 </script>
 
@@ -475,87 +410,10 @@ onUnmounted(() => {
 .pos-root {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: calc(100vh - 56px);
   background: #f5f7fa;
   color: #303133;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
-}
-
-.pos-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 24px;
-  height: 56px;
-  background: #ffffff;
-  border-bottom: 1px solid #e4e7ed;
-  flex-shrink: 0;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
-
-  .header-left {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-
-    .store-name {
-      font-size: 16px;
-      font-weight: 600;
-      color: #303133;
-    }
-  }
-
-  .header-center {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-
-    .time {
-      font-size: 20px;
-      font-weight: 600;
-      color: #303133;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .date {
-      font-size: 13px;
-      color: #909399;
-    }
-  }
-
-  .header-right {
-    display: flex;
-    gap: 24px;
-    align-items: center;
-
-    .stat {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-
-      .stat-label {
-        font-size: 12px;
-        color: #909399;
-      }
-
-      .stat-value {
-        font-size: 16px;
-        font-weight: 600;
-        color: #B4471D;
-      }
-    }
-
-    .back-btn {
-      background: #f5f7fa;
-      border: 1px solid #e4e7ed;
-      color: #606266;
-
-      &:hover {
-        background: #ecf5ff;
-        border-color: #B4471D;
-        color: #B4471D;
-      }
-    }
-  }
 }
 
 .pos-body {

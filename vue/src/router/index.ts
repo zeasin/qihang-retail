@@ -40,6 +40,7 @@ export const constantRoutes = [
     name: 'POS',
     component: () => import('@/views/pos/layout/PosLayout.vue'),
     redirect: '/pos/cashier',
+    hidden: true,
     meta: { title: 'POS收银台', icon: 'shopping', requiresAuth: true },
     children: [
       {

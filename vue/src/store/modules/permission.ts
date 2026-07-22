@@ -96,8 +96,20 @@ function resolveRoutePath(path: string, parentPath: string): string {
   return cleanPath(result)
 }
 
+const EXCLUDED_PATHS = ['/pos', 'pos']
+const EXCLUDED_TITLES = ['POS', '收银']
+
+function isExcludedRoute(route: MenuRecord): boolean {
+  const path = route.path?.toLowerCase() || ''
+  const title = route.meta?.title?.toLowerCase() || ''
+  if (EXCLUDED_PATHS.some(p => path.includes(p))) return true
+  if (EXCLUDED_TITLES.some(t => title.includes(t.toLowerCase()))) return true
+  return false
+}
+
 function filterAsyncRouter(routes: MenuRecord[], parentPath: string = ''): any[] {
   return routes
+    .filter((route) => !isExcludedRoute(route))
     .filter((route) => route.component || route.children?.length)
     .map((route) => {
       const r: Record<string, any> = { ...route }
