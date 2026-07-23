@@ -7,6 +7,7 @@
     <resultMap id="BaseResultMap" type="cn.qihangerp.model.entity.OOrder">
             <id property="id" column="id" jdbcType="BIGINT"/>
             <result property="orderNum" column="order_num" jdbcType="VARCHAR"/>
+            <result property="orderSource" column="order_source" jdbcType="VARCHAR"/>
             <result property="orderMode" column="order_mode" jdbcType="INTEGER"/>
             <result property="shopType" column="shop_type" jdbcType="INTEGER"/>
             <result property="shopId" column="shop_id" jdbcType="BIGINT"/>
@@ -65,7 +66,7 @@
         <result property="description" column="description" jdbcType="VARCHAR"/>
     </resultMap>
     <sql id="Base_Column_List">
-        id,order_num,order_mode,shop_type,shop_id,merchant_id,remark,buyer_memo,
+        id,order_num,order_source,order_mode,shop_type,shop_id,merchant_id,remark,buyer_memo,
         seller_memo,tag,dist_status,ship_status,order_status,platform_status_desc,platform_status_code,
           goods_amount,amount,platform_discount,seller_discount,payment,post_fee,
         receiver_name,receiver_mobile,address,

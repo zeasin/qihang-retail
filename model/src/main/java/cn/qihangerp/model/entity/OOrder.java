@@ -28,6 +28,12 @@ public class OOrder implements Serializable {
      * 订单编号（第三方平台订单号）
      */
     private String orderNum;
+
+    /**
+     * 订单来源：POS=POS收银、MT_FLASH=美团闪购、MT_WM=美团外卖、JD_DJ=京东到家、TAO_FLASH=淘宝闪购、EL_Flash=饿了么、WECHAT_MINI=微信小程序
+     */
+    private String orderSource;
+
     private int orderMode;
 
     /**
