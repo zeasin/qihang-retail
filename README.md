@@ -88,7 +88,6 @@
 | 营销促销 | ✅ 已完成 | 复用 `o_marketing_discount_rule` |
 | POS收银 | 🚧 开发中 | Electron桌面端 + 离线模式 |
 | 即时零售 | 📋 规划中 | 美团/淘宝/京东/抖音对接 |
-| 商业版 | 📋 规划中 | 加盟/业财/AI/开放API |
 
 ---
 
@@ -931,23 +930,22 @@ RedisConnectionFailureException: Unable to connect to Redis
 
 启航开源项目矩阵：
 
-| 项目               | 定位                 | Gitee | GitHub                                              |
-|:-------------------|:---------------------|:------|:----------------------------------------------------|
-| **启航零售ERP ⬅** | **线下零售管理平台** | [Gitee](https://gitee.com/qiliping/qihang-retail) | [GitHub](https://github.com/zeasin/qihang-retail)   |
-| 启航电商ERP        | 电商业务 AI 底座     | [Gitee](https://gitee.com/qiliping/qihang-erp-open) | [GitHub](https://github.com/zeasin/qihang-erp-open) |
-| OMS 订单中台       | 轻量级订单管理       | [Gitee](https://gitee.com/qiliping/qihang-oms) | [GitHub](https://github.com/zeasin/qihang-oms)      |
-| 启航跨境电商ERP    | 跨境电商专用版       | [Gitee](https://gitee.com/qiliping/qihang-cb-erp) | [GitHub](https://github.com/zeasin/qihang-cb-erp)                                          |
+| 项目               | 定位                 | 官网 | Gitee | GitHub                                              |
+|:-------------------|:---------------------|:-----|:------|:----------------------------------------------------|
+| **启航零售ERP ⬅** | **线下零售管理平台** | [官网](https://qihangerp.cn/open/retail-erp.html) | [Gitee](https://gitee.com/qiliping/qihang-retail) | [GitHub](https://github.com/zeasin/qihang-retail)   |
+| 启航电商ERP        | 电商业务 AI 底座     | [官网](https://qihangerp.cn/open/erp.html) | [Gitee](https://gitee.com/qiliping/qihang-erp-open) | [GitHub](https://github.com/zeasin/qihang-erp-open) |
+| OMS 订单中台       | 轻量级订单管理       | [官网](https://qihangerp.cn/open/oms.html) | [Gitee](https://gitee.com/qiliping/qihang-oms) | [GitHub](https://github.com/zeasin/qihang-oms)      |
+| 启航跨境电商ERP    | 跨境电商专用版       | [官网](https://qihangerp.cn/open/cross-border.html) | [Gitee](https://gitee.com/qiliping/qihang-cb-erp) | [GitHub](https://github.com/zeasin/qihang-cb-erp)                                          |
 
 ---
 
-## 商业版
+## 企业版
 
 如需多商户架构、专业技术支持、功能定制、私有化部署等，请联系：
 
 | 方式 | 信息 |
 |------|------|
-| 官网 | https://qihangerp.cn |
-| 邮箱 | qihangerp@qq.com |
+| 企业版 | https://qihangerp.cn |
 
 ---
 
