@@ -36,7 +36,7 @@ export default defineConfig(({ mode }) => {
       port: 88,
       proxy: {
         '/api': {
-          target: env.VITE_APP_BASE_API || 'http://localhost:8088',
+          target: 'http://localhost:6666',
           changeOrigin: true,
         },
       },
