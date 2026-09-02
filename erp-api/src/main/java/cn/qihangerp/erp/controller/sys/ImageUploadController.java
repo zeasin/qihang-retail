@@ -23,7 +23,7 @@ import java.util.Properties;
 @RestController
 public class ImageUploadController {
 
-    @RequestMapping("/api/sys-api/images/upload")
+    @RequestMapping("/sys-api/images/upload")
     public AjaxResult uploadImage(MultipartFile file) throws IOException {
         if (file.isEmpty()) return AjaxResult.error(400, "请选择图片");
         String fileSuffix = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf(".") + 1, file.getOriginalFilename().length());

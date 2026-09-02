@@ -57,7 +57,7 @@ const emit = defineEmits<{
 }>()
 
 const baseUrl = import.meta.env.VITE_APP_BASE_API || ''
-const uploadImgUrl = baseUrl + '/api/sys-api/images/upload'
+const uploadImgUrl = baseUrl + '/sys-api/images/upload'
 const headers = { Authorization: 'Bearer ' + getToken() }
 
 const number = ref(0)

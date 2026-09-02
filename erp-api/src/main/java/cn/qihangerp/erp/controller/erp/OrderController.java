@@ -22,7 +22,7 @@ import java.util.ArrayList;
 @Slf4j
 @AllArgsConstructor
 @RestController
-@RequestMapping("/api/erp-api/order")
+@RequestMapping("/erp-api/order")
 public class OrderController extends BaseController
 {
 

@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @RestController
-@RequestMapping("/api/erp-api/stockOut")
+@RequestMapping("/erp-api/stockOut")
 public class StockOutController extends BaseController {
     private final ErpStockOutService stockOutService;
 

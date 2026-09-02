@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @RestController
-@RequestMapping("/api/erp-api/goods_category")
+@RequestMapping("/erp-api/goods_category")
 public class GoodsCategoryController  extends BaseController {
     private final OGoodsCategoryService categoryService;
     private final OGoodsCategoryAttributeService categoryAttributeService;

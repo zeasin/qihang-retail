@@ -17,7 +17,7 @@ import java.util.Arrays;
 
 @AllArgsConstructor
 @RestController
-@RequestMapping("/api/sys-api/alert/channel")
+@RequestMapping("/sys-api/alert/channel")
 public class SysAlertChannelController extends BaseController {
     private final ISysAlertChannelService channelService;
 

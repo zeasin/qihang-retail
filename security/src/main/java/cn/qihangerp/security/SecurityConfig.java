@@ -77,16 +77,16 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/images/preview/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/system/config/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/captchaImage").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/sys-api/captchaImage").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/sys-api/system/config/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/sys-api/captchaImage").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/sys-api/system/config/**").permitAll()
                         .requestMatchers("/pdd/oauth_callback").permitAll()
                         // 允许直接访问授权登录接口
                         .requestMatchers(HttpMethod.POST, "/login").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/sys-api/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/sys-api/login").permitAll()
                         // SSE 推送通知放行
-                        .requestMatchers("/api/erp-api/sse/notify_msg").permitAll()
+                        .requestMatchers("/erp-api/sse/notify_msg").permitAll()
                         // AI简报接口放行
-                        .requestMatchers(HttpMethod.GET, "/api/ai/brief").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/ai/brief").permitAll()
                         // 允许 SpringMVC 的默认错误地址匿名访问
                         .requestMatchers("/error").permitAll()
                         // 其他所有接口必须有Authority信息，Authority在登录成功后的UserDetailsImpl对象中默认设置"ROLE_USER"

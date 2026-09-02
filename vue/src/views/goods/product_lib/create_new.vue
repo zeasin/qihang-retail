@@ -163,7 +163,7 @@ import type { FormInstance } from 'element-plus'
 const router = useRouter()
 const route = useRoute()
 
-const uploadImgUrl = import.meta.env.VITE_APP_BASE_API + '/api/sys-api/images/upload'
+const uploadImgUrl = import.meta.env.VITE_APP_BASE_API + '/sys-api/images/upload'
 const headers = { Authorization: 'Bearer ' + getToken() }
 const fileType = ['png', 'jpg', 'jpeg']
 const uploadList = ref<any[]>([])

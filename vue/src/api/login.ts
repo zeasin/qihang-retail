@@ -18,7 +18,7 @@ export interface UserInfo {
 
 export function login(data: LoginData) {
   return request({
-    url: '/api/sys-api/login',
+    url: '/sys-api/login',
     method: 'post',
     data,
   })
@@ -26,14 +26,14 @@ export function login(data: LoginData) {
 
 export function getInfo() {
   return request<any, UserInfo>({
-    url: '/api/sys-api/getInfo',
+    url: '/sys-api/getInfo',
     method: 'get',
   })
 }
 
 export function logout() {
   return request({
-    url: '/api/sys-api/logout',
+    url: '/sys-api/logout',
     method: 'post',
   })
 }
@@ -46,7 +46,7 @@ export interface CaptchaResult {
 
 export function getCodeImg() {
   return request<any, CaptchaResult>({
-    url: '/api/sys-api/captchaImage',
+    url: '/sys-api/captchaImage',
     method: 'get',
   })
 }

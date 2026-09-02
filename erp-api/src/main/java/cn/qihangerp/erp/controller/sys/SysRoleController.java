@@ -26,7 +26,7 @@ import java.util.List;
  * @author qihang
  */
 @RestController
-@RequestMapping("/api/sys-api/system/role")
+@RequestMapping("/sys-api/system/role")
 public class SysRoleController extends BaseController
 {
     @Autowired

@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @RestController
-@RequestMapping("/api/erp-api/goods_brand")
+@RequestMapping("/erp-api/goods_brand")
 public class GoodsBrandController extends BaseController {
     private final OGoodsBrandService brandService;
     @GetMapping("/list")

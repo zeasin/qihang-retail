@@ -24,7 +24,7 @@ import java.util.List;
  */
 @AllArgsConstructor
 @RestController
-@RequestMapping("/api/erp-api/goodsInventory")
+@RequestMapping("/erp-api/goodsInventory")
 public class GoodsInventoryController extends BaseController {
 
     private final OGoodsInventoryService goodsInventoryService;

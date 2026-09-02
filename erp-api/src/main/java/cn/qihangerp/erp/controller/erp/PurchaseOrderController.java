@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @AllArgsConstructor
 @RestController
-@RequestMapping("/api/erp-api/erp/purchase")
+@RequestMapping("/erp-api/erp/purchase")
 public class PurchaseOrderController extends BaseController
 {
     private final ErpPurchaseOrderService erpPurchaseOrderService;

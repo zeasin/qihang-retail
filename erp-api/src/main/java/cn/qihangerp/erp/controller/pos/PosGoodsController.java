@@ -19,7 +19,7 @@ import java.util.List;
  */
 @AllArgsConstructor
 @RestController
-@RequestMapping("/api/pos-api/goods")
+@RequestMapping("/pos-api/goods")
 public class PosGoodsController extends BaseController {
 
     private final OGoodsService goodsService;

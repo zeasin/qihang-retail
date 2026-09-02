@@ -110,7 +110,7 @@ async function send() {
   abortRef.value = new AbortController()
 
   try {
-    const response = await fetch('/api/ai/chat/send', {
+    const response = await fetch('/ai/chat/send', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

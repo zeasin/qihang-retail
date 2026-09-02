@@ -14,7 +14,7 @@ import java.util.Arrays;
 
 @AllArgsConstructor
 @RestController
-@RequestMapping("/api/erp-api/supplier")
+@RequestMapping("/erp-api/supplier")
 public class SupplierController extends BaseController {
     private final ErpSupplierService supplierService;
 

@@ -87,7 +87,7 @@ function connectSse() {
   const token = getToken()
   if (!token) return
   const es = new EventSource(
-    import.meta.env.VITE_APP_BASE_API + '/api/erp-api/sse/notify_msg?clientId=' + sseClientId + '&token=' + token
+    import.meta.env.VITE_APP_BASE_API + '/erp-api/sse/notify_msg?clientId=' + sseClientId + '&token=' + token
   )
   es.addEventListener('message', (e: MessageEvent) => {
     try {

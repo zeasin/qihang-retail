@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
  * @author qihang
  */
 @RestController
-@RequestMapping("/api/sys-api/system/user/profile")
+@RequestMapping("/sys-api/system/user/profile")
 public class SysProfileController extends BaseController
 {
     @Autowired

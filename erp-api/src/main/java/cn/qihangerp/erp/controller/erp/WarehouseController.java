@@ -18,7 +18,7 @@ import java.util.List;
 
 @AllArgsConstructor
 @RestController
-@RequestMapping("/api/erp-api/warehouse")
+@RequestMapping("/erp-api/warehouse")
 public class WarehouseController extends BaseController {
     private final ErpWarehouseService warehouseService;
     private final ErpWarehousePositionService positionService;

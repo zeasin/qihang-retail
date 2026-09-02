@@ -18,7 +18,7 @@ import java.util.List;
  */
 @AllArgsConstructor
 @RestController
-@RequestMapping("/api/pos-api/store")
+@RequestMapping("/pos-api/store")
 public class PosStoreController extends BaseController {
 
     private final OShopService shopService;

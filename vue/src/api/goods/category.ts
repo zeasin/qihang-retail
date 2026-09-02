@@ -2,7 +2,7 @@ import request from '@/utils/request'
 
 export function listCategory(query?: Record<string, any>) {
   return request({
-    url: '/api/erp-api/goods_category/list',
+    url: '/erp-api/goods_category/list',
     method: 'get',
     params: query
   })
@@ -10,14 +10,14 @@ export function listCategory(query?: Record<string, any>) {
 
 export function getCategory(id: number | string) {
   return request({
-    url: '/api/erp-api/goods_category/' + id,
+    url: '/erp-api/goods_category/' + id,
     method: 'get'
   })
 }
 
 export function addCategory(data: Record<string, any>) {
   return request({
-    url: '/api/erp-api/goods_category',
+    url: '/erp-api/goods_category',
     method: 'post',
     data
   })
@@ -25,7 +25,7 @@ export function addCategory(data: Record<string, any>) {
 
 export function updateCategory(data: Record<string, any>) {
   return request({
-    url: '/api/erp-api/goods_category',
+    url: '/erp-api/goods_category',
     method: 'put',
     data
   })
@@ -33,7 +33,7 @@ export function updateCategory(data: Record<string, any>) {
 
 export function delCategory(id: number | string) {
   return request({
-    url: '/api/erp-api/goods_category/del/' + id,
+    url: '/erp-api/goods_category/del/' + id,
     method: 'delete'
   })
 }

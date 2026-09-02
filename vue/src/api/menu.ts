@@ -23,7 +23,7 @@ export interface MenuRecord {
 
 export function getRouters() {
   return request<any, Record<string, any>>({
-    url: '/api/sys-api/getRouters',
+    url: '/sys-api/getRouters',
     method: 'get',
   })
 }

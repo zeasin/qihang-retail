@@ -337,7 +337,7 @@ function handleImport() {
 
 function handleExport() {
   request({
-    url: '/api/erp-api/goods/sku/export',
+    url: '/erp-api/goods/sku/export',
     method: 'get',
     params: queryParams,
     responseType: 'blob'

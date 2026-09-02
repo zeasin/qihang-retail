@@ -14,7 +14,7 @@ import java.util.List;
 
 @AllArgsConstructor
 @RestController
-@RequestMapping("/api/sys-api/system/config")
+@RequestMapping("/sys-api/system/config")
 public class SysConfigController {
     private final SysConfigService configService;
 

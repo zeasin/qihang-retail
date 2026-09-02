@@ -21,7 +21,7 @@ import java.util.List;
  */
 @AllArgsConstructor
 @RestController
-@RequestMapping("/api/erp-api/erp/logistics")
+@RequestMapping("/erp-api/erp/logistics")
 public class PurchaseLogisticsController extends BaseController
 {
     private final ErpPurchaseLogisticsService logisticsService;

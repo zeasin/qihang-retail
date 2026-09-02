@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @AllArgsConstructor
 @RestController
-@RequestMapping("/api/erp-api/order")
+@RequestMapping("/erp-api/order")
 public class OrderItemController extends BaseController
 {
     private final OOrderItemService itemService;

@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @AllArgsConstructor
 @RestController
-@RequestMapping("/api/pos-api/member")
+@RequestMapping("/pos-api/member")
 public class PosMemberController extends BaseController {
 
     private final OmsShopMemberService memberService;

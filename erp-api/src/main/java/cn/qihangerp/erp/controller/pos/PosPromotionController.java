@@ -16,7 +16,7 @@ import java.util.List;
  */
 @AllArgsConstructor
 @RestController
-@RequestMapping("/api/pos-api/promotion")
+@RequestMapping("/pos-api/promotion")
 public class PosPromotionController extends BaseController {
 
     private final OMarketingDiscountRuleService discountRuleService;

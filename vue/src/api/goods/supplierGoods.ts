@@ -2,7 +2,7 @@ import request from '@/utils/request'
 
 export function listGoods(query?: Record<string, any>) {
   return request({
-    url: '/api/erp-api/supplier/goods/list',
+    url: '/erp-api/supplier/goods/list',
     method: 'get',
     params: query
   })
@@ -10,14 +10,14 @@ export function listGoods(query?: Record<string, any>) {
 
 export function getGoodsItem(id: number | string) {
   return request({
-    url: '/api/erp-api/supplier/goods/' + id,
+    url: '/erp-api/supplier/goods/' + id,
     method: 'get'
   })
 }
 
 export function addGoodsItem(data: Record<string, any>) {
   return request({
-    url: '/api/erp-api/supplier/goods/add',
+    url: '/erp-api/supplier/goods/add',
     method: 'post',
     data
   })
@@ -25,7 +25,7 @@ export function addGoodsItem(data: Record<string, any>) {
 
 export function updateGoodsItem(data: Record<string, any>) {
   return request({
-    url: '/api/erp-api/supplier/goods/edit',
+    url: '/erp-api/supplier/goods/edit',
     method: 'put',
     data
   })
@@ -33,14 +33,14 @@ export function updateGoodsItem(data: Record<string, any>) {
 
 export function delGoodsSpec(id: number | string) {
   return request({
-    url: '/api/erp-api/supplier/goods/del/' + id,
+    url: '/erp-api/supplier/goods/del/' + id,
     method: 'delete'
   })
 }
 
 export function updateGoodsStatus(data: Record<string, any>) {
   return request({
-    url: '/api/erp-api/supplier/goods/status',
+    url: '/erp-api/supplier/goods/status',
     method: 'put',
     data
   })
@@ -51,25 +51,25 @@ export function updateGoodsStatus(data: Record<string, any>) {
  * @param data {supplierId, goodsId, skus:[{skuId, price, skuCode, skuName}]}
  */
 export function linkGoodsFromLibrary(data: Record<string, any>) {
-  return request({ url: '/api/erp-api/supplier/goods/link', method: 'post', data })
+  return request({ url: '/erp-api/supplier/goods/link', method: 'post', data })
 }
 
 /** 供应商SKU列表 */
 export function listSupplierSku(query?: Record<string, any>) {
-  return request({ url: '/api/erp-api/supplier/goods_sku/list', method: 'get', params: query })
+  return request({ url: '/erp-api/supplier/goods_sku/list', method: 'get', params: query })
 }
 
 /** 删除供应商SKU（含报价记录） */
 export function delSupplierSku(id: number | string) {
-  return request({ url: '/api/erp-api/supplier/goods_sku/del/' + id, method: 'delete' })
+  return request({ url: '/erp-api/supplier/goods_sku/del/' + id, method: 'delete' })
 }
 
 /** 供应商报价列表 */
 export function listSupplierPrice(query?: Record<string, any>) {
-  return request({ url: '/api/erp-api/supplier/price/list', method: 'get', params: query })
+  return request({ url: '/erp-api/supplier/price/list', method: 'get', params: query })
 }
 
 /** 保存供应商报价（更新SKU最新价+新增报价记录） */
 export function saveSupplierPrice(data: Record<string, any>) {
-  return request({ url: '/api/erp-api/supplier/price/savePrice', method: 'post', data })
+  return request({ url: '/erp-api/supplier/price/savePrice', method: 'post', data })
 }

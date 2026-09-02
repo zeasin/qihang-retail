@@ -44,7 +44,7 @@ public class CaptchaController
     /**
      * 生成验证码
      */
-    @GetMapping("/api/sys-api/captchaImage")
+    @GetMapping("/sys-api/captchaImage")
     public AjaxResult getCode() throws IOException
     {
         AjaxResult ajax = AjaxResult.success();

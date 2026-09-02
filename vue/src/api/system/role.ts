@@ -2,7 +2,7 @@ import request from '@/utils/request'
 
 export function listRole(query: Record<string, any>) {
   return request({
-    url: '/api/sys-api/system/role/list',
+    url: '/sys-api/system/role/list',
     method: 'get',
     params: query
   })
@@ -10,14 +10,14 @@ export function listRole(query: Record<string, any>) {
 
 export function getRole(roleId: number | string) {
   return request({
-    url: '/api/sys-api/system/role/' + roleId,
+    url: '/sys-api/system/role/' + roleId,
     method: 'get'
   })
 }
 
 export function addRole(data: Record<string, any>) {
   return request({
-    url: '/api/sys-api/system/role',
+    url: '/sys-api/system/role',
     method: 'post',
     data
   })
@@ -25,7 +25,7 @@ export function addRole(data: Record<string, any>) {
 
 export function updateRole(data: Record<string, any>) {
   return request({
-    url: '/api/sys-api/system/role',
+    url: '/sys-api/system/role',
     method: 'put',
     data
   })
@@ -33,7 +33,7 @@ export function updateRole(data: Record<string, any>) {
 
 export function changeRoleStatus(roleId: number | string, status: string) {
   return request({
-    url: '/api/sys-api/system/role/changeStatus',
+    url: '/sys-api/system/role/changeStatus',
     method: 'put',
     data: { roleId, status }
   })
@@ -41,14 +41,14 @@ export function changeRoleStatus(roleId: number | string, status: string) {
 
 export function delRole(roleId: number | string) {
   return request({
-    url: '/api/sys-api/system/role/' + roleId,
+    url: '/sys-api/system/role/' + roleId,
     method: 'delete'
   })
 }
 
 export function allocatedUserList(query: Record<string, any>) {
   return request({
-    url: '/api/sys-api/system/role/authUser/allocatedList',
+    url: '/sys-api/system/role/authUser/allocatedList',
     method: 'get',
     params: query
   })
@@ -56,7 +56,7 @@ export function allocatedUserList(query: Record<string, any>) {
 
 export function unallocatedUserList(query: Record<string, any>) {
   return request({
-    url: '/api/sys-api/system/role/authUser/unallocatedList',
+    url: '/sys-api/system/role/authUser/unallocatedList',
     method: 'get',
     params: query
   })
@@ -64,7 +64,7 @@ export function unallocatedUserList(query: Record<string, any>) {
 
 export function authUserCancel(data: Record<string, any>) {
   return request({
-    url: '/api/sys-api/system/role/authUser/cancel',
+    url: '/sys-api/system/role/authUser/cancel',
     method: 'put',
     data
   })
@@ -72,7 +72,7 @@ export function authUserCancel(data: Record<string, any>) {
 
 export function authUserCancelAll(data: Record<string, any>) {
   return request({
-    url: '/api/sys-api/system/role/authUser/cancelAll',
+    url: '/sys-api/system/role/authUser/cancelAll',
     method: 'put',
     params: data
   })
@@ -80,7 +80,7 @@ export function authUserCancelAll(data: Record<string, any>) {
 
 export function authUserSelectAll(data: Record<string, any>) {
   return request({
-    url: '/api/sys-api/system/role/authUser/selectAll',
+    url: '/sys-api/system/role/authUser/selectAll',
     method: 'put',
     params: data
   })

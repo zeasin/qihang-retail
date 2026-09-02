@@ -18,7 +18,7 @@ import java.util.List;
  */
 @AllArgsConstructor
 @RestController
-@RequestMapping("/api/pos-api/employee")
+@RequestMapping("/pos-api/employee")
 public class PosEmployeeController extends BaseController {
 
     private final ErpSalesPersonService salesPersonService;

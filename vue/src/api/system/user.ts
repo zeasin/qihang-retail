@@ -3,7 +3,7 @@ import { parseStrEmpty } from '@/utils/zhijian'
 
 export function listUser(query: Record<string, any>) {
   return request({
-    url: '/api/sys-api/system/user/list',
+    url: '/sys-api/system/user/list',
     method: 'get',
     params: query
   })
@@ -11,14 +11,14 @@ export function listUser(query: Record<string, any>) {
 
 export function getUser(userId?: number | string) {
   return request({
-    url: '/api/sys-api/system/user/' + parseStrEmpty(userId),
+    url: '/sys-api/system/user/' + parseStrEmpty(userId),
     method: 'get'
   })
 }
 
 export function addUser(data: Record<string, any>) {
   return request({
-    url: '/api/sys-api/system/user',
+    url: '/sys-api/system/user',
     method: 'post',
     data
   })
@@ -26,7 +26,7 @@ export function addUser(data: Record<string, any>) {
 
 export function updateUser(data: Record<string, any>) {
   return request({
-    url: '/api/sys-api/system/user',
+    url: '/sys-api/system/user',
     method: 'put',
     data
   })
@@ -34,14 +34,14 @@ export function updateUser(data: Record<string, any>) {
 
 export function delUser(userId: number | string) {
   return request({
-    url: '/api/sys-api/system/user/' + userId,
+    url: '/sys-api/system/user/' + userId,
     method: 'delete'
   })
 }
 
 export function resetUserPwd(userId: number | string, password: string) {
   return request({
-    url: '/api/sys-api/system/user/resetPwd',
+    url: '/sys-api/system/user/resetPwd',
     method: 'put',
     data: { userId, password }
   })
@@ -49,7 +49,7 @@ export function resetUserPwd(userId: number | string, password: string) {
 
 export function changeUserStatus(userId: number | string, status: string) {
   return request({
-    url: '/api/sys-api/system/user/changeStatus',
+    url: '/sys-api/system/user/changeStatus',
     method: 'put',
     data: { userId, status }
   })
@@ -57,14 +57,14 @@ export function changeUserStatus(userId: number | string, status: string) {
 
 export function getUserProfile() {
   return request({
-    url: '/api/sys-api/system/user/profile',
+    url: '/sys-api/system/user/profile',
     method: 'get'
   })
 }
 
 export function updateUserProfile(data: Record<string, any>) {
   return request({
-    url: '/api/sys-api/system/user/profile',
+    url: '/sys-api/system/user/profile',
     method: 'put',
     data
   })
@@ -72,7 +72,7 @@ export function updateUserProfile(data: Record<string, any>) {
 
 export function updateUserPwd(oldPassword: string, newPassword: string) {
   return request({
-    url: '/api/sys-api/system/user/profile/updatePwd',
+    url: '/sys-api/system/user/profile/updatePwd',
     method: 'put',
     params: { oldPassword, newPassword }
   })
@@ -80,7 +80,7 @@ export function updateUserPwd(oldPassword: string, newPassword: string) {
 
 export function uploadAvatar(data: FormData) {
   return request({
-    url: '/api/sys-api/system/user/profile/avatar',
+    url: '/sys-api/system/user/profile/avatar',
     method: 'post',
     data
   })
@@ -88,14 +88,14 @@ export function uploadAvatar(data: FormData) {
 
 export function getAuthRole(userId: number | string) {
   return request({
-    url: '/api/sys-api/system/user/authRole/' + userId,
+    url: '/sys-api/system/user/authRole/' + userId,
     method: 'get'
   })
 }
 
 export function updateAuthRole(data: Record<string, any>) {
   return request({
-    url: '/api/sys-api/system/user/authRole',
+    url: '/sys-api/system/user/authRole',
     method: 'put',
     params: data
   })
@@ -103,7 +103,7 @@ export function updateAuthRole(data: Record<string, any>) {
 
 export function deptTreeSelect() {
   return request({
-    url: '/api/sys-api/system/user/deptTree',
+    url: '/sys-api/system/user/deptTree',
     method: 'get'
   })
 }

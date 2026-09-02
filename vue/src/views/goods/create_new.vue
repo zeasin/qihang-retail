@@ -248,7 +248,7 @@ const tagsViewStore = useTagsViewStore()
 const formRef = ref<FormInstance>()
 const sShopOrderItemRef = ref()
 
-const uploadImgUrl = import.meta.env.VITE_APP_BASE_API + '/api/sys-api/images/upload'
+const uploadImgUrl = import.meta.env.VITE_APP_BASE_API + '/sys-api/images/upload'
 const headers = {
   Authorization: 'Bearer ' + getToken()
 }

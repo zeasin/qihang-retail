@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 @AllArgsConstructor
 @RestController
-@RequestMapping("/api/erp-api/stockIn")
+@RequestMapping("/erp-api/stockIn")
 public class StockInController extends BaseController {
     private final ErpStockInService stockInService;
     @GetMapping("/list")

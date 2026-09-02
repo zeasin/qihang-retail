@@ -19,7 +19,7 @@ import java.util.List;
  */
 @AllArgsConstructor
 @RestController
-@RequestMapping("/api/pos-api/cashier")
+@RequestMapping("/pos-api/cashier")
 public class PosCashierController extends BaseController {
 
     private final ErpSalesOrderService salesOrderService;

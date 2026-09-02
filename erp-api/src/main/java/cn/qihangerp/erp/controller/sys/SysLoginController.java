@@ -41,7 +41,7 @@ public class SysLoginController
      * @param loginBody 登录信息
      * @return 结果
      */
-    @PostMapping("/api/sys-api/login")
+    @PostMapping("/sys-api/login")
     public AjaxResult login(@RequestBody LoginBody loginBody)
     {
         try {
@@ -61,7 +61,7 @@ public class SysLoginController
      * 
      * @return 用户信息
      */
-    @GetMapping("/api/sys-api/getInfo")
+    @GetMapping("/sys-api/getInfo")
     public AjaxResult getInfo()
     {
         SysUser user = SecurityUtils.getLoginUser().getUser();
@@ -81,7 +81,7 @@ public class SysLoginController
      * 
      * @return 路由信息
      */
-    @GetMapping("/api/sys-api/getRouters")
+    @GetMapping("/sys-api/getRouters")
     public AjaxResult getRouters()
     {
         Long userId = SecurityUtils.getUserId();

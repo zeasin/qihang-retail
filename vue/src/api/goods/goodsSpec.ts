@@ -2,7 +2,7 @@ import request from '@/utils/request'
 
 export function listGoodsSpec(query?: Record<string, any>) {
   return request({
-    url: '/api/erp-api/goods/sku_list',
+    url: '/erp-api/goods/sku_list',
     method: 'get',
     params: query
   })
@@ -10,14 +10,14 @@ export function listGoodsSpec(query?: Record<string, any>) {
 
 export function getGoodsSpec(id: number | string) {
   return request({
-    url: '/api/erp-api/goods/sku/' + id,
+    url: '/erp-api/goods/sku/' + id,
     method: 'get'
   })
 }
 
 export function addGoodsSpec(data: Record<string, any>) {
   return request({
-    url: '/api/erp-api/goods/goodsSku',
+    url: '/erp-api/goods/goodsSku',
     method: 'post',
     data
   })
@@ -25,7 +25,7 @@ export function addGoodsSpec(data: Record<string, any>) {
 
 export function updateGoodsSpec(data: Record<string, any>) {
   return request({
-    url: '/api/erp-api/goods/sku',
+    url: '/erp-api/goods/sku',
     method: 'put',
     data
   })
@@ -33,7 +33,7 @@ export function updateGoodsSpec(data: Record<string, any>) {
 
 export function delGoodsSpec(id: number | string) {
   return request({
-    url: '/api/erp-api/goods/goodsSkuDel/' + id,
+    url: '/erp-api/goods/goodsSkuDel/' + id,
     method: 'delete'
   })
 }
