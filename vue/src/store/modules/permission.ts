@@ -62,6 +62,12 @@ const viewsMap: Record<string, () => Promise<any>> = {
   'wms/stockOut/stock_out': () => import('@/views/wms/stockOut/stock_out.vue'),
   'library/logistics_company/index': () => import('@/views/library/logistics_company/index.vue'),
   'components/icons/index': () => import('@/views/components/icons/index.vue'),
+  'vendor/product': () => import('@/views/vendor/product/index.vue'),
+  'vendor/product/index': () => import('@/views/vendor/product/index.vue'),
+  'vendor/product/goods_list': () => import('@/views/vendor/product/goods_list.vue'),
+  'vendor/product/goods_sku_list': () => import('@/views/vendor/product/goods_sku_list.vue'),
+  'vendor/product/price': () => import('@/views/vendor/product/price.vue'),
+  'supplier_product_list': () => import('@/views/vendor/product/goods_list.vue'),
 }
 
 function loadView(view: string) {
