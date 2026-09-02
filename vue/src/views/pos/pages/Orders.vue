@@ -183,7 +183,7 @@ async function loadOrders() {
       params.startDate = dateRange.value[0]
       params.endDate = dateRange.value[1]
     }
-    const res = await getOrderList(params)
+    const res: any = await getOrderList(params)
     orderList.value = res.rows || res.data || []
     total.value = res.total || 0
   } catch (e) {

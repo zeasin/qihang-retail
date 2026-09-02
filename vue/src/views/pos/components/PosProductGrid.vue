@@ -103,6 +103,10 @@ const emit = defineEmits<{
 
 const viewMode = ref<'grid' | 'list'>('grid')
 
+function loadMore() {
+  emit('loadMore')
+}
+
 function emitViewMode() {
   emit('viewModeChange', viewMode.value)
 }

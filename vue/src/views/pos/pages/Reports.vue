@@ -174,12 +174,12 @@ const isSettled = ref(false)
 
 const paymentTotal = computed(() => {
   if (!reportData.value?.paymentStats) return 1
-  return reportData.value.paymentStats.reduce((sum, item) => sum + item.amount, 1)
+  return reportData.value.paymentStats.reduce((sum: number, item: any) => sum + item.amount, 1)
 })
 
 const timeMax = computed(() => {
   if (!reportData.value?.timeStats) return 1
-  return Math.max(...reportData.value.timeStats.map(item => item.count), 1)
+  return Math.max(...reportData.value.timeStats.map((item: any) => item.count), 1)
 })
 
 onMounted(() => {

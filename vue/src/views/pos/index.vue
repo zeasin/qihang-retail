@@ -481,7 +481,7 @@ async function loadProducts(reset = true) {
   }
   loading.value = true
   try {
-    const res = await getGoodsList({ pageNum: pageNum.value, pageSize: 24, status: 1 })
+    const res: any = await getGoodsList({ pageNum: pageNum.value, pageSize: 24, status: 1 })
     const list = res.rows || []
     products.value = reset ? list : [...products.value, ...list]
     hasMore.value = list.length >= 24
@@ -494,7 +494,7 @@ async function loadProducts(reset = true) {
 
 async function loadCategories() {
   try {
-    const res = await listCategory({})
+    const res: any = await listCategory({})
     categories.value = res.rows || []
   } catch (e) {
     console.error(e)
@@ -556,7 +556,7 @@ async function confirmSkuSelect() {
   const sku = selectedSku.value
   const product = selectedProduct.value
   
-  const firstBatch = sku.batches && sku.batches.length > 0 ? sku.batches[0] : null
+  const firstBatch = sku.batches && sku.batches.length > 0 ? sku.batches[0] : undefined
   await addToCartWithSku(product, sku, firstBatch)
 }
 
@@ -571,7 +571,7 @@ async function addToCart(product: Product) {
     await loadSkuInventory(sku)
   }
   
-  const firstBatch = sku.batches && sku.batches.length > 0 ? sku.batches[0] : null
+  const firstBatch = sku.batches && sku.batches.length > 0 ? sku.batches[0] : undefined
   await addToCartWithSku(product, sku, firstBatch)
 }
 

@@ -82,7 +82,7 @@ function getCategoryIcon(index: number) {
 
 async function loadCategories() {
   try {
-    const response = await listCategory({})
+    const response: any = await listCategory({})
     categories.value = response.rows || []
   } catch (error) {
     console.error('加载分类失败:', error)

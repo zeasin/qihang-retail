@@ -196,7 +196,7 @@ async function loadMembers() {
     if (searchKeyword.value) {
       params.keyword = searchKeyword.value
     }
-    const res = await getMemberList(params)
+    const res: any = await getMemberList(params)
     memberList.value = res.rows || res.data || []
     total.value = res.total || 0
   } catch (e) {
