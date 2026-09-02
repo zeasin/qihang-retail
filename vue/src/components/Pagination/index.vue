@@ -9,8 +9,6 @@
       :pager-count="pagerCount"
       :total="total"
       v-bind="$attrs"
-      @update:current-page="handleCurrentChange"
-      @update:page-size="handleSizeChange"
       @size-change="handleSizeChange"
       @current-change="handleCurrentChange"
     />
@@ -18,7 +16,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { ref, watch } from 'vue'
 
 const props = withDefaults(defineProps<{
   total: number
@@ -47,23 +45,23 @@ const emit = defineEmits<{
   (e: 'update:limit', value: number): void
 }>()
 
-const currentPage = computed({
-  get: () => props.page,
-  set: (val: number) => emit('update:page', val)
-})
-const pageSize = computed({
-  get: () => props.limit,
-  set: (val: number) => emit('update:limit', val)
-})
+const currentPage = ref(props.page)
+const pageSize = ref(props.limit)
+
+watch(() => props.page, (val) => { currentPage.value = val })
+watch(() => props.limit, (val) => { pageSize.value = val })
 
 function handleSizeChange(val: number) {
-  if (currentPage.value * val > props.total) {
-    currentPage.value = 1
-  }
-  emit('pagination', { page: currentPage.value, limit: val })
+  pageSize.value = val
+  emit('update:limit', val)
+  currentPage.value = 1
+  emit('update:page', 1)
+  emit('pagination', { page: 1, limit: val })
 }
 
 function handleCurrentChange(val: number) {
+  currentPage.value = val
+  emit('update:page', val)
   emit('pagination', { page: val, limit: pageSize.value })
 }
 </script>

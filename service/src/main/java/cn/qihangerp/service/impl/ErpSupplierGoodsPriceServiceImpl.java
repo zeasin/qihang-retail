@@ -23,7 +23,7 @@ public class ErpSupplierGoodsPriceServiceImpl extends ServiceImpl<ErpSupplierGoo
         wrapper.eq(query.getMerchantId() != null, ErpSupplierGoodsPrice::getMerchantId, query.getMerchantId());
         wrapper.like(StringUtils.isNotBlank(query.getSkuCode()), ErpSupplierGoodsPrice::getSkuCode, query.getSkuCode());
         wrapper.orderByDesc(ErpSupplierGoodsPrice::getCreateTime);
-        Page<ErpSupplierGoodsPrice> page = this.page(new Page<>(pageQuery.getPageNum(), pageQuery.getPageSize()), wrapper);
+        Page<ErpSupplierGoodsPrice> page = this.page(pageQuery.build(), wrapper);
         return PageResult.build(page);
     }
 }

@@ -7204,7 +7204,7 @@ INSERT INTO `sys_menu` VALUES (409, '商品分类管理', 4, 80, 'category_list'
 INSERT INTO `sys_menu` VALUES (410, '商品品牌管理', 4, 81, 'brand_list', 'goods/brand/index', NULL, 1, 0, 'C', '0', '0', '', 'icon', 'admin', '2024-08-25 18:45:47', 'admin', '2024-09-07 15:48:31', '');
 INSERT INTO `sys_menu` VALUES (411, '分类规格属性', 4, 101, 'goods_category/attribute', 'goods/category/categoryAttribute', NULL, 1, 0, 'C', '1', '0', '', 'button', 'admin', '2024-08-25 18:49:22', 'admin', '2024-09-07 16:17:01', '');
 INSERT INTO `sys_menu` VALUES (412, '规格属性值', 4, 102, 'goods_category/attribute_value', 'goods/category/categoryAttributeValue', NULL, 1, 0, 'C', '1', '0', '', 'date', 'admin', '2024-08-25 18:51:55', 'admin', '2024-09-07 16:23:53', '');
-INSERT INTO `sys_menu` VALUES (415, '商品库存查询', 9, 30, 'goods_stock', 'stock/index.vue', NULL, 1, 0, 'C', '0', '0', '', 'chart', 'admin', '2024-09-21 20:43:00', 'admin', '2026-06-25 17:18:30', '');
+INSERT INTO `sys_menu` VALUES (415, '库存查询', 8, 30, 'goods_stock', 'stock/index.vue', NULL, 1, 0, 'C', '0', '0', '', 'chart', 'admin', '2024-09-21 20:43:00', 'admin', '2026-06-25 17:18:30', '');
 INSERT INTO `sys_menu` VALUES (432, '添加商品', 4, 12, 'create2', 'goods/create_new', NULL, 1, 0, 'C', '1', '0', '', '404', 'admin', '2025-02-24 18:14:06', 'admin', '2026-05-02 08:42:22', '');
 INSERT INTO `sys_menu` VALUES (435, '新增商品SKU', 4, 12, 'sku/add', 'goods/spec/add', NULL, 1, 0, 'C', '1', '0', '', 'date', 'admin', '2025-03-06 18:41:37', 'admin', '2026-05-02 08:42:29', '');
 INSERT INTO `sys_menu` VALUES (478, '添加ERP商品', 4, 99, 'create', 'goods/create', NULL, 1, 0, 'C', '1', '0', '', 'checkbox', 'admin', '2024-03-18 07:59:57', 'admin', '2024-09-07 16:41:46', '');
@@ -7225,7 +7225,7 @@ INSERT INTO `sys_menu` VALUES (1110, '电商平台设置', 11, 8, 'platform', 's
 INSERT INTO `sys_menu` VALUES (1185, '国家地区设置', 11, 9, 'region', 'shop/region/index', NULL, 1, 0, 'C', '1', '0', '', 'color', 'admin', '2024-03-21 20:05:39', 'admin', '2025-07-03 13:43:32', '');
 INSERT INTO `sys_menu` VALUES (1186, '定时任务配置', 11, 50, 'sys_task', 'system/task/index', NULL, 1, 0, 'C', '0', '0', '', 'time-range', 'admin', '2024-03-22 19:29:20', 'admin', '2025-07-05 23:09:18', '');
 INSERT INTO `sys_menu` VALUES (2090, '角色管理', 5, 2, 'role', 'system/role/index', NULL, 1, 0, 'C', '0', '0', NULL, 'peoples', 'admin', '2024-03-31 12:40:50', '', NULL, '');
-INSERT INTO `sys_menu` VALUES (2096, '订单备货', 9, 10, 'stocking', 'shipping/stocking', NULL, 1, 0, 'C', '0', '0', '', 'email', 'admin', '2024-07-20 11:53:24', 'admin', '2025-10-10 18:15:29', '');
+INSERT INTO `sys_menu` VALUES (2096, '订单备货', 8, 10, 'stocking', 'shipping/stocking', NULL, 1, 0, 'C', '0', '0', '', 'email', 'admin', '2024-07-20 11:53:24', 'admin', '2025-10-10 18:15:29', '');
 INSERT INTO `sys_menu` VALUES (2108, '供应商档案', 7, 90, 'supplier_list', 'goods/supplier/index', NULL, 1, 0, 'C', '0', '0', '', 'people', 'admin', '2024-08-25 18:27:55', 'admin', '2026-07-11 19:57:34', '');
 INSERT INTO `sys_menu` VALUES (2114, '仓库管理', 9, 90, 'warehouse', 'wms/warehouse/index.vue', NULL, 1, 0, 'C', '0', '0', '', 'cloudWarehouse', 'admin', '2024-09-21 20:07:26', 'admin', '2025-10-12 08:49:06', '');
 INSERT INTO `sys_menu` VALUES (2117, '仓位管理', 9, 91, 'position', 'wms/warehouse/position', NULL, 1, 0, 'C', '1', '0', '', '404', 'admin', '2024-09-22 11:52:18', 'admin', '2024-09-22 14:48:21', '');
