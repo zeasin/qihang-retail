@@ -81,28 +81,9 @@ const name = computed(() => userStore.name)
 const notifs = ref<any[]>([])
 const unreadCount = ref(0)
 
-let sseClientId = 'navbar_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8)
+let sseClientId = ''
 
 function connectSse() {
-  const token = getToken()
-  if (!token) return
-  const es = new EventSource(
-    import.meta.env.VITE_APP_BASE_API + '/erp-api/sse/notify_msg?clientId=' + sseClientId + '&token=' + token
-  )
-  es.addEventListener('message', (e: MessageEvent) => {
-    try {
-      const data = JSON.parse(e.data)
-      if (data.id) {
-        notifs.value.unshift(data)
-        if (notifs.value.length > 20) notifs.value.pop()
-        unreadCount.value++
-      }
-    } catch { /* ignore */ }
-  })
-  es.onerror = () => {
-    es.close()
-    setTimeout(connectSse, 30000)
-  }
 }
 
 onMounted(() => {
