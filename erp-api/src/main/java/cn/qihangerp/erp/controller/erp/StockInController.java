@@ -6,6 +6,7 @@ import cn.qihangerp.common.ResultVo;
 import cn.qihangerp.common.TableDataInfo;
 import cn.qihangerp.model.entity.ErpStockIn;
 import cn.qihangerp.model.request.StockInCreateRequest;
+import cn.qihangerp.model.request.StockInLocalItemRequest;
 import cn.qihangerp.model.request.StockInRequest;
 
 import cn.qihangerp.security.common.BaseController;
@@ -38,6 +39,15 @@ public class StockInController extends BaseController {
     public AjaxResult in(@RequestBody StockInRequest request)
     {
         ResultVo<Long> resultVo = stockInService.stockIn(getUserId(), getUsername(), request);
+        if(resultVo.getCode()==0)
+            return AjaxResult.success();
+        else return AjaxResult.error(resultVo.getMsg());
+    }
+
+    @PostMapping("/in_local")
+    public AjaxResult inLocal(@RequestBody StockInLocalItemRequest request)
+    {
+        ResultVo<Long> resultVo = stockInService.localStockInItem(request, getUserId(), getUsername());
         if(resultVo.getCode()==0)
             return AjaxResult.success();
         else return AjaxResult.error(resultVo.getMsg());

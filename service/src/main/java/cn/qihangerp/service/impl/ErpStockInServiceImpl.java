@@ -539,6 +539,116 @@ public class ErpStockInServiceImpl extends ServiceImpl<ErpStockInMapper, ErpStoc
         return ResultVo.success();
     }
 
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public ResultVo<Long> localStockInItem(StockInLocalItemRequest request, Long userId, String userName) {
+        // 1. 校验本地仓是否存在
+        ErpWarehouse localWarehouse = warehouseService.getOne(
+            new LambdaQueryWrapper<ErpWarehouse>().eq(ErpWarehouse::getWarehouseType, "LOCAL").last("limit 1"));
+        if (localWarehouse == null) {
+            return ResultVo.error("请先创建本地仓库");
+        }
+
+        if (request.getEntryId() == null) return ResultVo.error("入库单ID不能为空");
+        if (request.getEntryItemId() == null) return ResultVo.error("入库单明细ID不能为空");
+        if (request.getQuantity() == null || request.getQuantity() <= 0) return ResultVo.error("入库数量必须大于0");
+
+        ErpStockIn erpStockIn = mapper.selectById(request.getEntryId());
+        if (erpStockIn == null) return ResultVo.error("没有找到入库单");
+        if (erpStockIn.getStatus() == 2) return ResultVo.error("入库单已全部入库");
+
+        ErpStockInItem stockInItem = inItemService.getById(request.getEntryItemId());
+        if (stockInItem == null) return ResultVo.error("没有找到入库单明细");
+        if (stockInItem.getStatus() == 2) return ResultVo.error("该商品已全部入库");
+
+        Integer intoQty = request.getQuantity();
+        if (stockInItem.getInQuantity() != null) {
+            int remain = stockInItem.getQuantity().intValue() - stockInItem.getInQuantity().intValue();
+            if (intoQty > remain) return ResultVo.error("入库数量不能超过剩余数量");
+        }
+
+        // 2. 查询或创建库存记录 OGoodsInventory
+        OGoodsSku oGoodsSku = skuService.getById(stockInItem.getSkuId());
+        if (oGoodsSku == null) return ResultVo.error("没有找到商品SKU信息");
+
+        Long goodsInventoryId = null;
+        List<OGoodsInventory> invList = oGoodsInventoryService.list(
+            new LambdaQueryWrapper<OGoodsInventory>()
+                .eq(OGoodsInventory::getWarehouseId, localWarehouse.getId())
+                .eq(OGoodsInventory::getSkuId, Long.parseLong(stockInItem.getSkuId())));
+        if (invList.isEmpty()) {
+            OGoodsInventory inv = new OGoodsInventory();
+            inv.setWarehouseId(localWarehouse.getId());
+            inv.setMerchantId(stockInItem.getMerchantId());
+            inv.setShopId(stockInItem.getShopId());
+            inv.setGoodsId(Long.parseLong(stockInItem.getGoodsId()));
+            inv.setSkuId(Long.parseLong(stockInItem.getSkuId()));
+            inv.setSkuCode(stockInItem.getSkuCode());
+            inv.setGoodsNum(oGoodsSku.getGoodsNum());
+            inv.setGoodsName(oGoodsSku.getGoodsName());
+            inv.setSkuName(oGoodsSku.getSkuName());
+            inv.setGoodsImg(oGoodsSku.getColorImage());
+            inv.setQuantity(intoQty);
+            inv.setLockedQuantity(0);
+            inv.setAvailableQuantity(intoQty);
+            inv.setStockStatus(1);
+            inv.setIsDelete(0);
+            inv.setCreateBy(userName);
+            inv.setCreateTime(LocalDateTime.now());
+            oGoodsInventoryService.save(inv);
+            goodsInventoryId = inv.getId();
+        } else {
+            oGoodsInventoryService.addStock(invList.get(0).getId(), intoQty);
+            goodsInventoryId = invList.get(0).getId();
+        }
+
+        // 3. 创建库存批次 OGoodsInventoryBatch
+        OGoodsInventoryBatch inventoryBatch = new OGoodsInventoryBatch();
+        inventoryBatch.setInventoryId(goodsInventoryId);
+        inventoryBatch.setBatchNum(cn.qihangerp.utils.DateUtils.parseDateToStr("yyyyMMddHHmmss", LocalDateTime.now()));
+        inventoryBatch.setOriginQty(intoQty);
+        inventoryBatch.setCurrentQty(intoQty);
+        inventoryBatch.setPurPrice(stockInItem.getPurPrice() != null ? java.math.BigDecimal.valueOf(stockInItem.getPurPrice()) : null);
+        inventoryBatch.setPurId(stockInItem.getSourceId());
+        inventoryBatch.setPurItemId(stockInItem.getSourceItemId());
+        inventoryBatch.setMerchantId(stockInItem.getMerchantId());
+        inventoryBatch.setShopId(stockInItem.getShopId());
+        inventoryBatch.setInventoryMode(stockInItem.getInventoryMode());
+        inventoryBatch.setSkuId(Long.parseLong(stockInItem.getSkuId()));
+        inventoryBatch.setSkuCode(stockInItem.getSkuCode());
+        inventoryBatch.setGoodsId(Long.parseLong(stockInItem.getGoodsId()));
+        inventoryBatch.setWarehouseId(localWarehouse.getId());
+        inventoryBatch.setPositionId(0L);
+        inventoryBatch.setPositionNum("");
+        inventoryBatch.setCreateTime(LocalDateTime.now());
+        inventoryBatch.setCreateBy(userName);
+        oGoodsInventoryBatchService.save(inventoryBatch);
+
+        // 4. 回写入库单明细状态
+        ErpStockInItem update = new ErpStockInItem();
+        update.setId(stockInItem.getId());
+        Integer inQuantity = (stockInItem.getInQuantity() == null ? 0 : stockInItem.getInQuantity()) + intoQty;
+        update.setInQuantity(inQuantity);
+        update.setStatus(inQuantity.intValue() >= stockInItem.getQuantity().intValue() ? 2 : 1);
+        update.setUpdateBy(userName);
+        update.setUpdateTime(LocalDateTime.now());
+        inItemService.updateById(update);
+
+        // 5. 更新入库单主表状态
+        List<ErpStockInItem> itemList = inItemService.list(
+            new LambdaQueryWrapper<ErpStockInItem>().eq(ErpStockInItem::getStockInId, erpStockIn.getId()).ne(ErpStockInItem::getStatus, 2));
+        ErpStockIn sUpdate = new ErpStockIn();
+        sUpdate.setId(erpStockIn.getId());
+        sUpdate.setStatus(itemList.isEmpty() ? 2 : 1);
+        sUpdate.setStockInOperatorId(userId.toString());
+        sUpdate.setStockInTime(LocalDateTime.now());
+        sUpdate.setUpdateBy(userName);
+        sUpdate.setUpdateTime(LocalDateTime.now());
+        mapper.updateById(sUpdate);
+
+        return ResultVo.success();
+    }
+
     @Override
     public ErpStockIn getDetailAndItemById(Long id) {
         ErpStockIn erpStockIn = mapper.selectById(id);

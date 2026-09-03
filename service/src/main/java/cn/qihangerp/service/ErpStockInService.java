@@ -8,6 +8,7 @@ import cn.qihangerp.model.entity.ErpStockIn;
 import cn.qihangerp.model.request.StockInCreateRequest;
 import cn.qihangerp.model.request.StockInItemInRequest;
 import cn.qihangerp.model.request.StockInLocalRequest;
+import cn.qihangerp.model.request.StockInLocalItemRequest;
 import cn.qihangerp.model.request.StockInRequest;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -33,6 +34,10 @@ public interface ErpStockInService extends IService<ErpStockIn> {
      */
     ResultVo<Long> localStockIn(StockInLocalRequest request, Long userId, String userName );
 
+    /**
+     * 本地仓 单条入库操作
+     */
+    ResultVo<Long> localStockInItem(StockInLocalItemRequest request, Long userId, String userName);
 
     ErpStockIn getDetailAndItemById(Long id);
 }
