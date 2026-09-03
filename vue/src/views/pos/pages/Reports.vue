@@ -129,32 +129,6 @@
           </el-table>
           <el-empty v-if="!reportData.goodsRanking || reportData.goodsRanking.length === 0" description="暂无数据" :image-size="60" />
         </el-card>
-
-        <el-card class="settlement-card">
-          <template #header>
-            <div class="settlement-header">
-              <span class="chart-title">交班结算</span>
-              <el-button type="primary" @click="handleSettlement" :disabled="isSettled">
-                {{ isSettled ? '已交班' : '确认交班' }}
-              </el-button>
-            </div>
-          </template>
-          <div class="settlement-info">
-            <el-descriptions :column="2" border>
-              <el-descriptions-item label="收银员">{{ reportData.cashierName || '当前用户' }}</el-descriptions-item>
-              <el-descriptions-item label="交班时间">{{ reportData.settleTime || '--' }}</el-descriptions-item>
-              <el-descriptions-item label="现金收入">¥{{ formatAmount(reportData.cashIncome) }}</el-descriptions-item>
-              <el-descriptions-item label="微信收入">¥{{ formatAmount(reportData.wechatIncome) }}</el-descriptions-item>
-              <el-descriptions-item label="支付宝收入">¥{{ formatAmount(reportData.alipayIncome) }}</el-descriptions-item>
-              <el-descriptions-item label="银行卡收入">¥{{ formatAmount(reportData.bankCardIncome) }}</el-descriptions-item>
-              <el-descriptions-item label="会员充值">¥{{ formatAmount(reportData.memberRecharge) }}</el-descriptions-item>
-              <el-descriptions-item label="退款支出">¥{{ formatAmount(reportData.refundAmount) }}</el-descriptions-item>
-              <el-descriptions-item label="应上缴" :span="2">
-                <span class="settlement-amount">¥{{ formatAmount(reportData.totalSales - reportData.refundAmount) }}</span>
-              </el-descriptions-item>
-            </el-descriptions>
-          </div>
-        </el-card>
       </template>
     </div>
   </div>
@@ -162,7 +136,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage } from 'element-plus'
 import { Money, ShoppingCart, User, RefreshLeft, Download } from '@element-plus/icons-vue'
 import { getDailyReport } from '@/api/pos/pos'
 
@@ -170,7 +144,6 @@ const loading = ref(false)
 const selectedDate = ref('')
 const dateType = ref('today')
 const reportData = ref<any>(null)
-const isSettled = ref(false)
 
 const paymentTotal = computed(() => {
   if (!reportData.value?.paymentStats) return 1
@@ -221,7 +194,6 @@ async function loadReport() {
   try {
     const res = await getDailyReport(1, selectedDate.value)
     reportData.value = res.data || generateMockData()
-    isSettled.value = reportData.value.settled || false
   } catch (e) {
     console.error(e)
     reportData.value = generateMockData()
@@ -236,13 +208,6 @@ function generateMockData() {
     orderCount: 56,
     memberCount: 23,
     refundAmount: 150.00,
-    cashierName: '收银员A',
-    settleTime: '',
-    cashIncome: 800.00,
-    wechatIncome: 1200.50,
-    alipayIncome: 380.00,
-    bankCardIncome: 200.00,
-    memberRecharge: 500.00,
     paymentStats: [
       { method: 'CASH', name: '现金', count: 18, amount: 800.00 },
       { method: 'WECHAT', name: '微信', count: 25, amount: 1200.50 },
@@ -299,23 +264,6 @@ function getPayMethodName(method: string) {
 function formatAmount(amount: any) {
   if (!amount) return '0.00'
   return Number(amount).toFixed(2)
-}
-
-async function handleSettlement() {
-  try {
-    await ElMessageBox.confirm(
-      '确认交班？交班后将无法修改当日数据。',
-      '交班确认',
-      { type: 'warning' }
-    )
-    reportData.value.settleTime = new Date().toLocaleString('zh-CN')
-    isSettled.value = true
-    ElMessage.success('交班成功')
-  } catch (e: any) {
-    if (e !== 'cancel') {
-      ElMessage.error('交班失败')
-    }
-  }
 }
 
 function exportReport() {
@@ -545,19 +493,5 @@ function exportReport() {
 .amount {
   color: #B4471D;
   font-weight: 600;
-}
-
-.settlement-card {
-  .settlement-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .settlement-amount {
-    font-size: 20px;
-    font-weight: 700;
-    color: #B4471D;
-  }
 }
 </style>

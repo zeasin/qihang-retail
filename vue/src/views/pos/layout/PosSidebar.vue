@@ -49,7 +49,7 @@ const navItems = [
   { path: '/pos/orders', label: '订单查询', icon: List },
   { path: '/pos/members', label: '会员管理', icon: User },
   { path: '/pos/refund', label: '退款管理', icon: Coin },
-  { path: '/pos/reports', label: '交班结算', icon: DataAnalysis },
+  { path: '/pos/reports', label: '业绩统计', icon: DataAnalysis },
 ]
 </script>
 

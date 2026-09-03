@@ -40,7 +40,7 @@ const titleMap: Record<string, string> = {
   '/pos/orders': '订单查询',
   '/pos/members': '会员管理',
   '/pos/refund': '退款管理',
-  '/pos/reports': '交班结算',
+  '/pos/reports': '业绩统计',
 }
 
 const currentTitle = computed(() => titleMap[currentPath.value] || 'POS系统')
