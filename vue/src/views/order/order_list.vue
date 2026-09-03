@@ -43,9 +43,32 @@
       <right-toolbar v-model:showSearch="showSearch" @queryTable="getList" />
     </el-row>
 
-    <el-table v-loading="loading" :data="orderList" @selection-change="handleSelectionChange">
+    <el-table v-loading="loading" :data="orderList" @selection-change="handleSelectionChange" row-key="id">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="订单编号" align="center" prop="orderNum" width="220" />
+      <el-table-column label="订单编号" align="center" prop="orderNum" width="180" />
+      <el-table-column label="商品信息" align="center" width="150">
+        <template #default="scope">
+          <span>{{ getSkuCount(scope.row) }}个SKU，共{{ getTotalQuantity(scope.row) }}件</span>
+        </template>
+      </el-table-column>
+      <el-table-column type="expand">
+        <template #default="scope">
+          <div style="padding: 0 20px">
+            <el-table :data="scope.row.itemVoList || scope.row.itemList || []" border size="small" max-height="300">
+              <el-table-column label="商品名称" prop="goodsTitle" min-width="120" show-overflow-tooltip />
+              <el-table-column label="规格" prop="goodsSpec" width="80" />
+              <el-table-column label="编码" prop="goodsNum" width="90" />
+              <el-table-column label="单价" prop="goodsPrice" width="70" align="right">
+                <template #default="scope">{{ scope.row.goodsPrice?.toFixed(2) }}</template>
+              </el-table-column>
+              <el-table-column label="数量" prop="quantity" width="50" align="center" />
+              <el-table-column label="小计" width="70" align="right">
+                <template #default="scope">{{ scope.row.itemAmount?.toFixed(2) }}</template>
+              </el-table-column>
+            </el-table>
+          </div>
+        </template>
+      </el-table-column>
       <el-table-column label="收件人" align="center" prop="receiverName" />
       <el-table-column label="手机号" align="center" prop="receiverMobile" />
       <el-table-column label="配送方式" align="center" prop="deliveryMethod" width="100">
@@ -489,5 +512,14 @@ function getStatusType(status: number) {
 function getDeliveryLabel(method: number) {
   const item = deliveryOptions.find(i => i.value === method)
   return item ? item.label : '-'
+}
+
+function getSkuCount(row: any) {
+  return (row.itemVoList || row.itemList || []).length
+}
+
+function getTotalQuantity(row: any) {
+  const items = row.itemVoList || row.itemList || []
+  return items.reduce((sum: number, item: any) => sum + (item.quantity || 0), 0)
 }
 </script>
