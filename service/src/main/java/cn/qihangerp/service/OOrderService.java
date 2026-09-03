@@ -84,4 +84,19 @@ public interface OOrderService extends IService<OOrder> {
      * @return
      */
     ResultVo cancelDouOrderMessage(String douOrderId);
+
+    /**
+     * 插入订单明细
+     */
+    void insertOrderItem(OOrderItem orderItem);
+
+    /**
+     * 按订单来源分页查询
+     */
+    PageResult<OOrder> queryPageListBySource(OOrder query, PageQuery pageQuery);
+
+    /**
+     * 查询订单明细列表
+     */
+    List<OOrderItem> selectItemsByOrderId(String orderId);
 }

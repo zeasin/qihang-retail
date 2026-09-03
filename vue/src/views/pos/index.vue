@@ -341,7 +341,7 @@ import {
 } from '@element-plus/icons-vue'
 import { getGoodsList, getSkuInventory, getSkuInventoryBatches, batchSkuInventory } from '@/api/pos/pos'
 import { listCategory } from '@/api/goods/category'
-import { addOrder } from '@/api/order/salesOrder'
+import { submitOrder } from '@/api/pos/pos'
 
 interface InventoryInfo {
   skuId: string
@@ -741,7 +741,7 @@ async function confirmPay() {
   showPaymentDialog.value = false
   const orderNo = 'POS' + Date.now()
   try {
-    await addOrder({
+    await submitOrder({
       orderNo,
       items: cartItems.value.map(i => ({
         goodsId: i.goodsId,

@@ -4,113 +4,244 @@ import cn.qihangerp.common.AjaxResult;
 import cn.qihangerp.common.PageQuery;
 import cn.qihangerp.common.PageResult;
 import cn.qihangerp.common.TableDataInfo;
-import cn.qihangerp.model.entity.ErpSalesOrder;
-import cn.qihangerp.model.entity.ErpSalesOrderItem;
+import cn.qihangerp.model.entity.*;
 import cn.qihangerp.security.common.BaseController;
-import cn.qihangerp.service.ErpSalesOrderService;
+import cn.qihangerp.service.*;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.AllArgsConstructor;
+import lombok.Data;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
-/**
- * POS收银Controller
- * 复用 erp_sales_order + erp_sales_order_item 表
- */
 @AllArgsConstructor
 @RestController
 @RequestMapping("/pos-api/cashier")
 public class PosCashierController extends BaseController {
 
-    private final ErpSalesOrderService salesOrderService;
+    private final OOrderService orderService;
+    private final OGoodsInventoryService goodsInventoryService;
+    private final ErpStockOutService stockOutService;
+    private final ErpStockOutItemService stockOutItemService;
 
     /**
-     * 提交销售单（收银结算）
+     * POS收银提交订单 → 锁定库存
      */
     @PostMapping("/submit")
-    public AjaxResult submit(@RequestBody SalesOrderRequest request) {
-        // TODO: 实现销售单提交逻辑
-        // 1. 创建销售单 erp_sales_order
-        // 2. 创建销售明细 erp_sales_order_item
-        // 3. 扣减库存
-        // 4. 会员积分累计
-        // 5. 优惠券核销
-        return success("销售单提交功能待实现");
+    @Transactional(rollbackFor = Exception.class)
+    public AjaxResult submit(@RequestBody PosOrderRequest request) {
+        if (request.getItems() == null || request.getItems().isEmpty()) {
+            return AjaxResult.error("请添加商品");
+        }
+
+        String username = getUsername();
+        LocalDateTime now = LocalDateTime.now();
+
+        OOrder order = new OOrder();
+        order.setOrderNum(request.getOrderNo());
+        order.setOrderSource("POS");
+        order.setOrderMode(1);
+        order.setShopType(0);
+        order.setShopId(0L);
+        order.setMerchantId(0L);
+        order.setOrderStatus(0);
+        order.setShipStatus(0);
+        order.setDistStatus(0);
+        order.setHasGift(0);
+        order.setDeliveryMethod(2);
+        order.setOrderTime(now);
+        order.setGoodsAmount(request.getPayAmount());
+        order.setAmount(request.getPayAmount());
+        order.setPayment(request.getPayAmount());
+        order.setCreateBy(username);
+        order.setCreateTime(now);
+        orderService.save(order);
+
+        String orderId = order.getId();
+
+        for (PosOrderItemRequest item : request.getItems()) {
+            OOrderItem orderItem = new OOrderItem();
+            orderItem.setOrderId(orderId);
+            orderItem.setOrderNum(request.getOrderNo());
+            orderItem.setSubOrderNum(request.getOrderNo());
+            orderItem.setGoodsId(item.getGoodsId());
+            orderItem.setGoodsSkuId(item.getSkuId());
+            orderItem.setGoodsTitle(item.getName());
+            orderItem.setBarcode(item.getBarCode());
+            orderItem.setGoodsPrice(item.getPrice());
+            orderItem.setQuantity(item.getQuantity());
+            orderItem.setItemAmount(item.getPrice() * item.getQuantity());
+            orderItem.setRefundStatus(1);
+            orderItem.setShipStatus(0);
+            orderItem.setHasPushErp(0);
+            orderItem.setIsGift(0);
+            orderItem.setShopId(order.getShopId());
+            orderItem.setShopType(order.getShopType());
+            orderItem.setMerchantId(order.getMerchantId());
+            orderItem.setCreateBy(username);
+            orderItem.setCreateTime(now);
+            orderService.insertOrderItem(orderItem);
+
+            lockInventory(item.getSkuId(), item.getQuantity());
+        }
+
+        return AjaxResult.success(order.getId());
     }
 
     /**
-     * 查询销售单列表
+     * 取消订单 → 解锁库存
      */
+    @PostMapping("/cancel")
+    @Transactional(rollbackFor = Exception.class)
+    public AjaxResult cancel(@RequestBody CancelOrderRequest request) {
+        if (request.getOrderId() == null) return AjaxResult.error("订单ID不能为空");
+
+        OOrder order = orderService.getById(request.getOrderId());
+        if (order == null) return AjaxResult.error("订单不存在");
+        if (order.getOrderStatus() != 0) return AjaxResult.error("订单状态不可取消");
+
+        String username = getUsername();
+        LocalDateTime now = LocalDateTime.now();
+
+        List<OOrderItem> items = orderService.selectItemsByOrderId(order.getId());
+        for (OOrderItem item : items) {
+            unlockInventory(item.getGoodsSkuId(), item.getQuantity());
+        }
+
+        OOrder update = new OOrder();
+        update.setId(order.getId());
+        update.setOrderStatus(11);
+        update.setCancelReason(request.getReason());
+        update.setUpdateBy(username);
+        update.setUpdateTime(now);
+        orderService.updateById(update);
+
+        return AjaxResult.success();
+    }
+
+    /**
+     * 确认订单 → 生成出库单（type=5 表示锁库出库，出库时从锁定库存转实扣）
+     */
+    @PostMapping("/confirm")
+    @Transactional(rollbackFor = Exception.class)
+    public AjaxResult confirm(@RequestBody ConfirmOrderRequest request) {
+        if (request.getOrderId() == null) return AjaxResult.error("订单ID不能为空");
+
+        OOrder order = orderService.getById(request.getOrderId());
+        if (order == null) return AjaxResult.error("订单不存在");
+        if (order.getOrderStatus() != 0) return AjaxResult.error("订单状态不可确认");
+
+        String username = getUsername();
+        LocalDateTime now = LocalDateTime.now();
+
+        List<OOrderItem> items = orderService.selectItemsByOrderId(order.getId());
+
+        // 1. 创建出库单
+        ErpStockOut stockOut = new ErpStockOut();
+        stockOut.setOutNum("SO-" + request.getOrderId());
+        stockOut.setSourceNum(order.getOrderNum());
+        stockOut.setSourceId(Long.parseLong(order.getId()));
+        stockOut.setType(5); // 5=POS锁库出库
+        stockOut.setGoodsUnit(items.size());
+        int totalQty = items.stream().mapToInt(OOrderItem::getQuantity).sum();
+        stockOut.setSpecUnit(items.size());
+        stockOut.setSpecUnitTotal(totalQty);
+        stockOut.setOutTotal(0);
+        stockOut.setStatus(0); // 待出库
+        stockOut.setCreateBy(username);
+        stockOut.setCreateTime(now);
+        stockOutService.save(stockOut);
+
+        // 2. 创建出库单明细
+        for (OOrderItem item : items) {
+            ErpStockOutItem outItem = new ErpStockOutItem();
+            outItem.setEntryId(stockOut.getId());
+            outItem.setType(5);
+            outItem.setSourceOrderId(Long.parseLong(order.getId()));
+            outItem.setSourceOrderNum(order.getOrderNum());
+            outItem.setSourceOrderItemId(Long.parseLong(item.getId()));
+            outItem.setGoodsId(item.getGoodsId());
+            outItem.setGoodsName(item.getGoodsTitle());
+            outItem.setSkuId(item.getGoodsSkuId());
+            outItem.setOriginalQuantity(item.getQuantity());
+            outItem.setOutQuantity(0);
+            outItem.setStatus(0);
+            outItem.setCreateBy(username);
+            outItem.setCreateTime(now);
+            stockOutItemService.save(outItem);
+        }
+
+        // 3. 更新订单状态为已确认
+        OOrder updateOrder = new OOrder();
+        updateOrder.setId(order.getId());
+        updateOrder.setOrderStatus(3);
+        updateOrder.setShipStatus(2);
+        updateOrder.setUpdateBy(username);
+        updateOrder.setUpdateTime(now);
+        orderService.updateById(updateOrder);
+
+        return AjaxResult.success(stockOut.getId());
+    }
+
+    private void lockInventory(Long skuId, int quantity) {
+        if (skuId == null || quantity <= 0) return;
+        OGoodsInventory inv = goodsInventoryService.getOne(
+            new LambdaQueryWrapper<OGoodsInventory>().eq(OGoodsInventory::getSkuId, skuId));
+        if (inv != null) goodsInventoryService.lockStock(inv.getId(), quantity);
+    }
+
+    private void unlockInventory(Long skuId, int quantity) {
+        if (skuId == null || quantity <= 0) return;
+        OGoodsInventory inv = goodsInventoryService.getOne(
+            new LambdaQueryWrapper<OGoodsInventory>().eq(OGoodsInventory::getSkuId, skuId));
+        if (inv != null) goodsInventoryService.lockStock(inv.getId(), -quantity);
+    }
+
     @GetMapping("/order/list")
-    public TableDataInfo orderList(ErpSalesOrder query, PageQuery pageQuery) {
-        PageResult<ErpSalesOrder> pageList = salesOrderService.queryPageList(query, pageQuery);
+    public TableDataInfo orderList(OOrder query, PageQuery pageQuery) {
+        query.setOrderSource("POS");
+        PageResult<OOrder> pageList = orderService.queryPageListBySource(query, pageQuery);
         return getDataTable(pageList);
     }
 
-    /**
-     * 查询销售单详情
-     */
     @GetMapping("/order/{id}")
-    public AjaxResult getOrderInfo(@PathVariable("id") Long id) {
-        ErpSalesOrder order = salesOrderService.getById(id);
-        if (order == null) {
-            return AjaxResult.error("销售单不存在");
-        }
-        List<ErpSalesOrderItem> items = salesOrderService.selectItemsByOrderId(id);
-        order.setItems(items);
+    public AjaxResult getOrderInfo(@PathVariable("id") String id) {
+        OOrder order = orderService.getById(id);
+        if (order == null) return AjaxResult.error("订单不存在");
+        List<OOrderItem> items = orderService.selectItemsByOrderId(id);
+        order.setItemList(items);
         return success(order);
     }
 
-    /**
-     * 退货
-     */
-    @PostMapping("/refund")
-    public AjaxResult refund(@RequestBody RefundRequest request) {
-        // TODO: 实现退货逻辑
-        // 1. 验证原订单
-        // 2. 创建退货单
-        // 3. 恢复库存
-        // 4. 退款处理
-        return success("退货功能待实现");
+    @Data
+    public static class PosOrderRequest {
+        private String orderNo;
+        private Double payAmount;
+        private String payMethod;
+        private List<PosOrderItemRequest> items;
     }
 
-    /**
-     * 销售单请求
-     */
-    @lombok.Data
-    public static class SalesOrderRequest {
-        private Long shopId;
-        private Long memberId;
-        private Long salesmanId;
-        private String payMethod; // CASH/WECHAT/ALIPAY/BANK_CARD/MEMBER_BALANCE
-        private java.math.BigDecimal totalAmount;
-        private java.math.BigDecimal discountAmount;
-        private java.math.BigDecimal paidAmount;
-        private List<OrderItemRequest> items;
-        private String remark;
-    }
-
-    /**
-     * 订单明细请求
-     */
-    @lombok.Data
-    public static class OrderItemRequest {
+    @Data
+    public static class PosOrderItemRequest {
         private Long goodsId;
         private Long skuId;
-        private String goodsName;
-        private java.math.BigDecimal price;
+        private String name;
+        private String skuName;
+        private Double price;
         private Integer quantity;
-        private java.math.BigDecimal subtotal;
+        private String barCode;
     }
 
-    /**
-     * 退货请求
-     */
-    @lombok.Data
-    public static class RefundRequest {
-        private Long orderId;
-        private String refundReason;
-        private java.math.BigDecimal refundAmount;
-        private String refundMethod; // ORIGINAL/CASH/BALANCE
+    @Data
+    public static class CancelOrderRequest {
+        private String orderId;
+        private String reason;
+    }
+
+    @Data
+    public static class ConfirmOrderRequest {
+        private String orderId;
     }
 }

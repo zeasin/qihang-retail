@@ -585,6 +585,27 @@ public class OOrderServiceImpl extends ServiceImpl<OOrderMapper, OOrder>
         return ResultVo.success();
     }
 
+    @Override
+    public void insertOrderItem(OOrderItem orderItem) {
+        orderItemMapper.insert(orderItem);
+    }
+
+    @Override
+    public PageResult<OOrder> queryPageListBySource(OOrder query, PageQuery pageQuery) {
+        LambdaQueryWrapper<OOrder> qw = new LambdaQueryWrapper<>();
+        qw.eq(StringUtils.hasText(query.getOrderSource()), OOrder::getOrderSource, query.getOrderSource());
+        qw.eq(query.getShopId() != null, OOrder::getShopId, query.getShopId());
+        qw.orderByDesc(OOrder::getCreateTime);
+        Page<OOrder> page = orderMapper.selectPage(pageQuery.build(), qw);
+        return PageResult.build(page);
+    }
+
+    @Override
+    public List<OOrderItem> selectItemsByOrderId(String orderId) {
+        return orderItemMapper.selectList(
+            new LambdaQueryWrapper<OOrderItem>().eq(OOrderItem::getOrderId, orderId));
+    }
+
 }
 
 
