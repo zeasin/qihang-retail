@@ -140,6 +140,11 @@ public class OOrder implements Serializable {
     private String town;
 
     /**
+     * 配送方式：1=现结，2=到店自提，3=商家配送，4=骑手配送
+     */
+    private Integer deliveryMethod;
+
+    /**
      * 订单时间
      */
     private LocalDateTime orderTime;

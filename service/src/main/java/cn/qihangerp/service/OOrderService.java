@@ -10,20 +10,38 @@ import cn.qihangerp.common.PageQuery;
 import cn.qihangerp.common.PageResult;
 import cn.qihangerp.common.ResultVo;
 
-
-
 import java.util.List;
 
 /**
-* @author qilip
-* @description 针对表【o_order(订单表)】的数据库操作Service
-* @createDate 2024-03-09 13:15:57
-*/
+ * @author qilip
+ * @description 针对表【o_order(订单表)】的数据库操作Service
+ * @createDate 2024-03-09 13:15:57
+ */
 public interface OOrderService extends IService<OOrder> {
 
     List<OOrder> getList(OOrder order);
     PageResult<OOrder> queryPageList(OrderSearchRequest bo, PageQuery pageQuery);
     PageResult<OOrder> queryWaitDistOrderPageList(OrderSearchRequest bo, PageQuery pageQuery);
+
+    /**
+     * 线下销售订单 - 分页查询
+     */
+    PageResult<OOrder> querySaleOrderPageList(OrderSearchRequest bo, PageQuery pageQuery);
+
+    /**
+     * 线下销售订单 - 新增（含明细）
+     */
+    ResultVo<Long> saveSaleOrder(OOrder order, List<OOrderItem> itemList, String username);
+
+    /**
+     * 线下销售订单 - 修改（含明细）
+     */
+    ResultVo<Long> updateSaleOrder(OOrder order, List<OOrderItem> itemList, String username);
+
+    /**
+     * 线下销售订单 - 删除（含明细）
+     */
+    ResultVo<Long> removeSaleOrder(Long id);
 
     /**
      * 更新订单状态

@@ -342,6 +342,199 @@ public class OOrderServiceImpl extends ServiceImpl<OOrderMapper, OOrder>
 
 
 
+    @Override
+    public PageResult<OOrder> querySaleOrderPageList(OrderSearchRequest bo, PageQuery pageQuery) {
+        if (StringUtils.hasText(bo.getStartTime())) {
+            if (!DateHelper.isValidDate(bo.getStartTime())) {
+                bo.setStartTime("");
+            }
+        }
+        if (StringUtils.hasText(bo.getEndTime())) {
+            if (!DateHelper.isValidDate(bo.getEndTime())) {
+                bo.setEndTime("");
+            }
+        } else {
+            bo.setEndTime(bo.getStartTime());
+        }
+
+        LambdaQueryWrapper<OOrder> queryWrapper = new LambdaQueryWrapper<OOrder>()
+                .eq(StringUtils.hasText(bo.getOrderNum()), OOrder::getOrderNum, bo.getOrderNum())
+                .eq(bo.getOrderStatus() != null, OOrder::getOrderStatus, bo.getOrderStatus())
+                .ge(StringUtils.hasText(bo.getStartTime()), OOrder::getOrderTime, bo.getStartTime() + " 00:00:00")
+                .le(StringUtils.hasText(bo.getEndTime()), OOrder::getOrderTime, bo.getEndTime() + " 23:59:59")
+                .like(StringUtils.hasText(bo.getReceiverName()), OOrder::getReceiverName, bo.getReceiverName())
+                .like(StringUtils.hasText(bo.getReceiverMobile()), OOrder::getReceiverMobile, bo.getReceiverMobile());
+
+        pageQuery.setOrderByColumn("order_time");
+        pageQuery.setIsAsc("desc");
+        Page<OOrder> pages = orderMapper.selectPage(pageQuery.build(), queryWrapper);
+
+        if (pages.getRecords() != null) {
+            for (OOrder order : pages.getRecords()) {
+                order.setItemVoList(orderItemMapper.selectOrderItemListByOrderId(Long.parseLong(order.getId())));
+            }
+        }
+
+        return PageResult.build(pages);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public ResultVo<Long> saveSaleOrder(OOrder order, List<OOrderItem> itemList, String username) {
+        if (itemList == null || itemList.isEmpty()) {
+            return ResultVo.error("请添加订单商品");
+        }
+
+        // 生成订单编号
+        String orderNum = "SO" + System.currentTimeMillis();
+        order.setOrderNum(orderNum);
+        order.setOrderMode(1); // 手工订单
+        order.setOrderStatus(0); // 新订单
+        order.setShipStatus(0);
+        order.setDistStatus(0);
+        order.setHasGift(0);
+        order.setCreateBy(username);
+        order.setCreateTime(LocalDateTime.now());
+        order.setUpdateBy(username);
+        order.setUpdateTime(LocalDateTime.now());
+        order.setOrderTime(LocalDateTime.now());
+
+        // 计算金额
+        double goodsAmount = 0;
+        for (OOrderItem item : itemList) {
+            goodsAmount += item.getGoodsPrice() * item.getQuantity();
+        }
+        order.setGoodsAmount(goodsAmount);
+        if (order.getAmount() == null) {
+            order.setAmount(goodsAmount);
+        }
+        if (order.getPayment() == null) {
+            order.setPayment(goodsAmount);
+        }
+
+        orderMapper.insert(order);
+
+        // 保存订单明细
+        for (OOrderItem item : itemList) {
+            item.setOrderId(order.getId());
+            item.setOrderNum(orderNum);
+            item.setSubOrderNum(orderNum);
+            item.setCreateTime(LocalDateTime.now());
+            item.setCreateBy(username);
+            item.setUpdateTime(LocalDateTime.now());
+            item.setUpdateBy(username);
+            item.setOrderTime(LocalDateTime.now());
+            item.setItemAmount(item.getGoodsPrice() * item.getQuantity());
+            if (item.getRefundStatus() == null) {
+                item.setRefundStatus(1);
+            }
+            if (item.getShipStatus() == null) {
+                item.setShipStatus(0);
+            }
+            if (item.getHasPushErp() == null) {
+                item.setHasPushErp(0);
+            }
+            if (item.getIsGift() == null) {
+                item.setIsGift(0);
+            }
+            orderItemMapper.insert(item);
+        }
+
+        return ResultVo.success(Long.parseLong(order.getId()));
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public ResultVo<Long> updateSaleOrder(OOrder order, List<OOrderItem> itemList, String username) {
+        OOrder existOrder = orderMapper.selectById(order.getId());
+        if (existOrder == null) {
+            return ResultVo.error("订单不存在");
+        }
+        if (existOrder.getOrderStatus() != 0 && existOrder.getOrderStatus() != 21) {
+            return ResultVo.error("当前订单状态不允许修改");
+        }
+
+        order.setUpdateBy(username);
+        order.setUpdateTime(LocalDateTime.now());
+        order.setOrderMode(1);
+
+        // 更新订单主表
+        OOrder update = new OOrder();
+        update.setId(order.getId());
+        update.setRemark(order.getRemark());
+        update.setReceiverName(order.getReceiverName());
+        update.setReceiverMobile(order.getReceiverMobile());
+        update.setDeliveryMethod(order.getDeliveryMethod());
+        update.setAddress(order.getAddress());
+        update.setProvince(order.getProvince());
+        update.setCity(order.getCity());
+        update.setTown(order.getTown());
+        update.setUpdateBy(username);
+        update.setUpdateTime(LocalDateTime.now());
+        if (order.getAmount() != null) {
+            update.setAmount(order.getAmount());
+        }
+        orderMapper.updateById(update);
+
+        // 更新明细：先删后插
+        if (itemList != null && !itemList.isEmpty()) {
+            orderItemMapper.delete(new LambdaQueryWrapper<OOrderItem>().eq(OOrderItem::getOrderId, order.getId()));
+
+            double goodsAmount = 0;
+            for (OOrderItem item : itemList) {
+                item.setOrderId(order.getId());
+                item.setOrderNum(existOrder.getOrderNum());
+                item.setSubOrderNum(existOrder.getOrderNum());
+                item.setCreateTime(LocalDateTime.now());
+                item.setCreateBy(username);
+                item.setUpdateTime(LocalDateTime.now());
+                item.setUpdateBy(username);
+                item.setOrderTime(existOrder.getOrderTime());
+                item.setItemAmount(item.getGoodsPrice() * item.getQuantity());
+                if (item.getRefundStatus() == null) {
+                    item.setRefundStatus(1);
+                }
+                if (item.getShipStatus() == null) {
+                    item.setShipStatus(0);
+                }
+                if (item.getHasPushErp() == null) {
+                    item.setHasPushErp(0);
+                }
+                if (item.getIsGift() == null) {
+                    item.setIsGift(0);
+                }
+                goodsAmount += item.getGoodsPrice() * item.getQuantity();
+                orderItemMapper.insert(item);
+            }
+
+            OOrder amountUpdate = new OOrder();
+            amountUpdate.setId(order.getId());
+            amountUpdate.setGoodsAmount(goodsAmount);
+            orderMapper.updateById(amountUpdate);
+        }
+
+        return ResultVo.success(Long.parseLong(order.getId()));
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public ResultVo<Long> removeSaleOrder(Long id) {
+        OOrder order = orderMapper.selectById(id);
+        if (order == null) {
+            return ResultVo.error("订单不存在");
+        }
+        if (order.getOrderStatus() != 0 && order.getOrderStatus() != 21 && order.getOrderStatus() != 11) {
+            return ResultVo.error("当前订单状态不允许删除");
+        }
+
+        // 删除明细
+        orderItemMapper.delete(new LambdaQueryWrapper<OOrderItem>().eq(OOrderItem::getOrderId, id));
+        // 删除主表
+        orderMapper.deleteById(id);
+
+        return ResultVo.success(id);
+    }
+
     @Transactional(rollbackFor = Exception.class)
     @Override
     public ResultVo cancelDouOrderMessage(String douOrderId) {
