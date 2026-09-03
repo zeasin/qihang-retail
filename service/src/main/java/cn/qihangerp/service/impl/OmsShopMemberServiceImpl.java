@@ -51,11 +51,16 @@ public class OmsShopMemberServiceImpl extends ServiceImpl<OmsShopMemberMapper, O
         if (query.getShopId() != null) {
             wrapper.eq(OmsShopMember::getShopId, query.getShopId());
         }
-        if (StringUtils.hasText(query.getPhone())) {
-            wrapper.like(OmsShopMember::getPhone, query.getPhone());
-        }
-        if (StringUtils.hasText(query.getName())) {
-            wrapper.like(OmsShopMember::getName, query.getName());
+        if (StringUtils.hasText(query.getKeyword())) {
+            wrapper.and(w -> w.like(OmsShopMember::getPhone, query.getKeyword())
+                    .or().like(OmsShopMember::getName, query.getKeyword()));
+        } else {
+            if (StringUtils.hasText(query.getPhone())) {
+                wrapper.like(OmsShopMember::getPhone, query.getPhone());
+            }
+            if (StringUtils.hasText(query.getName())) {
+                wrapper.like(OmsShopMember::getName, query.getName());
+            }
         }
         wrapper.orderByDesc(OmsShopMember::getCreateOn);
         return wrapper;

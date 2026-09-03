@@ -28,38 +28,23 @@
     </div>
 
     <el-table v-loading="loading" :data="memberList" stripe>
-      <el-table-column prop="phone" label="手机号" width="130">
+      <el-table-column prop="phone" label="手机号" width="140">
         <template #default="{ row }">
           <span class="member-phone" @click="viewDetail(row)">{{ row.phone }}</span>
         </template>
       </el-table-column>
-      <el-table-column prop="name" label="姓名" width="100" />
-      <el-table-column prop="gender" label="性别" width="80">
+      <el-table-column prop="name" label="姓名" width="120" />
+      <el-table-column prop="status" label="状态" width="90" align="center">
         <template #default="{ row }">
-          {{ row.gender === 1 ? '男' : row.gender === 2 ? '女' : '-' }}
+          <el-tag :type="row.status === 1 ? 'success' : 'info'">{{ row.status === 1 ? '已确认' : '未确认' }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="levelName" label="会员等级" width="100">
-        <template #default="{ row }">
-          <el-tag type="warning">{{ row.levelName || '普通会员' }}</el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column prop="points" label="积分" width="100" align="right" />
-      <el-table-column prop="balance" label="储值余额" width="120" align="right">
-        <template #default="{ row }">
-          <span class="balance">¥{{ formatAmount(row.balance) }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column prop="totalConsumption" label="累计消费" width="120" align="right">
-        <template #default="{ row }">
-          <span class="consumption">¥{{ formatAmount(row.totalConsumption) }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column prop="createTime" label="注册时间" width="180" />
-      <el-table-column label="操作" width="150" fixed="right">
+      <el-table-column prop="address" label="地址" min-width="160" show-overflow-tooltip />
+      <el-table-column prop="remark" label="备注" width="140" show-overflow-tooltip />
+      <el-table-column prop="createOn" label="注册时间" width="170" />
+      <el-table-column label="操作" width="100" fixed="right">
         <template #default="{ row }">
           <el-button type="primary" link size="small" @click="viewDetail(row)">详情</el-button>
-          <el-button type="success" link size="small" @click="openRechargeDialog(row)">充值</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -77,26 +62,15 @@
     </div>
 
     <el-dialog v-model="showAddDialog" title="新增会员" width="450px">
-      <el-form :model="memberForm" label-width="100px">
+      <el-form :model="memberForm" label-width="80px">
         <el-form-item label="手机号" required>
           <el-input v-model="memberForm.phone" placeholder="请输入手机号" maxlength="11" />
         </el-form-item>
         <el-form-item label="姓名" required>
           <el-input v-model="memberForm.name" placeholder="请输入姓名" />
         </el-form-item>
-        <el-form-item label="性别">
-          <el-radio-group v-model="memberForm.gender">
-            <el-radio :label="1">男</el-radio>
-            <el-radio :label="2">女</el-radio>
-          </el-radio-group>
-        </el-form-item>
-        <el-form-item label="生日">
-          <el-date-picker
-            v-model="memberForm.birthday"
-            type="date"
-            placeholder="选择生日"
-            value-format="YYYY-MM-DD"
-          />
+        <el-form-item label="备注">
+          <el-input v-model="memberForm.remark" type="textarea" placeholder="备注信息" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -112,49 +86,28 @@
           <div class="detail-info">
             <h3>{{ currentMember.name }}</h3>
             <p class="phone">{{ currentMember.phone }}</p>
-            <el-tag type="warning">{{ currentMember.levelName || '普通会员' }}</el-tag>
+            <el-tag :type="currentMember.status === 1 ? 'success' : 'info'">{{ currentMember.status === 1 ? '已确认' : '未确认' }}</el-tag>
           </div>
         </div>
         <el-descriptions :column="2" border>
-          <el-descriptions-item label="性别">{{ currentMember.gender === 1 ? '男' : currentMember.gender === 2 ? '女' : '-' }}</el-descriptions-item>
-          <el-descriptions-item label="生日">{{ currentMember.birthday || '-' }}</el-descriptions-item>
-          <el-descriptions-item label="积分">{{ currentMember.points || 0 }}</el-descriptions-item>
-          <el-descriptions-item label="储值余额">
-            <span class="balance">¥{{ formatAmount(currentMember.balance) }}</span>
-          </el-descriptions-item>
-          <el-descriptions-item label="累计消费">
-            <span class="consumption">¥{{ formatAmount(currentMember.totalConsumption) }}</span>
-          </el-descriptions-item>
-          <el-descriptions-item label="到店次数">{{ currentMember.visitCount || 0 }}</el-descriptions-item>
-          <el-descriptions-item label="注册时间">{{ currentMember.createTime }}</el-descriptions-item>
-          <el-descriptions-item label="最后到店">{{ currentMember.lastVisitTime || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="手机号">{{ currentMember.phone }}</el-descriptions-item>
+          <el-descriptions-item label="姓名">{{ currentMember.name }}</el-descriptions-item>
+          <el-descriptions-item label="省份">{{ currentMember.province || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="城市">{{ currentMember.city || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="区">{{ currentMember.county || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="地址" :span="2">{{ currentMember.address || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="备注" :span="2">{{ currentMember.remark || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="注册时间">{{ currentMember.createOn }}</el-descriptions-item>
+          <el-descriptions-item label="更新时间">{{ currentMember.updateOn || '-' }}</el-descriptions-item>
         </el-descriptions>
       </div>
-    </el-dialog>
-
-    <el-dialog v-model="showRechargeDialog" title="会员充值" width="400px">
-      <el-form :model="rechargeForm" label-width="100px">
-        <el-form-item label="会员">
-          <span>{{ currentMember?.name }} ({{ currentMember?.phone }})</span>
-        </el-form-item>
-        <el-form-item label="充值金额" required>
-          <el-input-number v-model="rechargeForm.amount" :min="1" :max="100000" :precision="2" />
-        </el-form-item>
-        <el-form-item label="赠送金额">
-          <el-input-number v-model="rechargeForm.giftAmount" :min="0" :max="10000" :precision="2" />
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <el-button @click="showRechargeDialog = false">取消</el-button>
-        <el-button type="primary" @click="confirmRecharge">确认充值</el-button>
-      </template>
     </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage } from 'element-plus'
 import { Search, Refresh, Plus } from '@element-plus/icons-vue'
 import { getMemberList, addMember as addMemberApi } from '@/api/pos/pos'
 
@@ -167,19 +120,12 @@ const searchKeyword = ref('')
 
 const showAddDialog = ref(false)
 const showDetailDialog = ref(false)
-const showRechargeDialog = ref(false)
 const currentMember = ref<any>(null)
 
 const memberForm = ref({
   phone: '',
   name: '',
-  gender: 1,
-  birthday: '',
-})
-
-const rechargeForm = ref({
-  amount: 100,
-  giftAmount: 0,
+  remark: '',
 })
 
 onMounted(() => {
@@ -219,18 +165,13 @@ function handleReset() {
 }
 
 function openAddDialog() {
-  memberForm.value = {
-    phone: '',
-    name: '',
-    gender: 1,
-    birthday: '',
-  }
+  memberForm.value = { phone: '', name: '', remark: '' }
   showAddDialog.value = true
 }
 
 async function handleAddMember() {
   if (!memberForm.value.phone || !memberForm.value.name) {
-    ElMessage.warning('请填写必填项')
+    ElMessage.warning('请填写手机号和姓名')
     return
   }
   try {
@@ -238,6 +179,7 @@ async function handleAddMember() {
       ...memberForm.value,
       shopId: 1,
       merchantId: 1,
+      shopType: 100,
     })
     ElMessage.success('新增会员成功')
     showAddDialog.value = false
@@ -251,38 +193,6 @@ async function handleAddMember() {
 function viewDetail(row: any) {
   currentMember.value = row
   showDetailDialog.value = true
-}
-
-function openRechargeDialog(row: any) {
-  currentMember.value = row
-  rechargeForm.value = {
-    amount: 100,
-    giftAmount: 0,
-  }
-  showRechargeDialog.value = true
-}
-
-async function confirmRecharge() {
-  try {
-    await ElMessageBox.confirm(
-      `确认充值 ¥${rechargeForm.value.amount.toFixed(2)}？`,
-      '充值确认',
-      { type: 'warning' }
-    )
-    ElMessage.success('充值成功（待后端实现）')
-    showRechargeDialog.value = false
-    loadMembers()
-  } catch (e: any) {
-    if (e !== 'cancel') {
-      console.error(e)
-      ElMessage.error('充值失败')
-    }
-  }
-}
-
-function formatAmount(amount: any) {
-  if (!amount) return '0.00'
-  return Number(amount).toFixed(2)
 }
 </script>
 
@@ -313,16 +223,6 @@ function formatAmount(amount: any) {
   &:hover {
     text-decoration: underline;
   }
-}
-
-.balance {
-  color: #67C23A;
-  font-weight: 600;
-}
-
-.consumption {
-  color: #B4471D;
-  font-weight: 600;
 }
 
 .pagination {
