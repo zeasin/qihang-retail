@@ -54,26 +54,4 @@ public class SupplierController extends BaseController {
     public AjaxResult remove(@PathVariable Long[] ids) {
         return toAjax(supplierService.removeByIds(Arrays.stream(ids).toList()));
     }
-
-    @SuppressWarnings("unchecked")
-    @PostMapping("/setLoginName")
-    public AjaxResult setLoginName(@RequestBody Map<String, Object> params) {
-        Long id = params.get("id") != null ? Long.valueOf(params.get("id").toString()) : null;
-        String loginName = params.get("loginName") != null ? params.get("loginName").toString() : null;
-        String loginPwd = params.get("loginPwd") != null ? params.get("loginPwd").toString() : null;
-        if (id == null || loginName == null || loginPwd == null) {
-            return error("参数不完整");
-        }
-        ErpSupplier supplier = supplierService.getById(id);
-        if (supplier == null) {
-            return error("供应商不存在");
-        }
-        ErpSupplier existing = supplierService.getByLoginName(loginName);
-        if (existing != null && !existing.getId().equals(id)) {
-            return error("登录名已存在");
-        }
-        supplier.setLoginName(loginName);
-        supplier.setLoginPwd(SecurityUtils.encryptPassword(loginPwd));
-        return toAjax(supplierService.updateById(supplier));
-    }
 }
