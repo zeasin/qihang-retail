@@ -4,7 +4,7 @@
       <template #header>
         <span>采购单</span>
       </template>
-      <el-form ref="formRef" :model="form" size="small" :rules="rules" :inline="true" label-width="128px">
+      <el-form ref="formRef" :model="form" size="small" :inline="true" label-width="128px">
         <el-col :span="24">
           <el-form-item label="采购单号">
             <el-input v-model="form.orderNum" disabled style="width: 220px" />
@@ -98,22 +98,6 @@
             <el-input v-model="stockInForm.remark" type="textarea" style="width: 220px" />
           </el-form-item>
         </el-row>
-        <el-row>
-          <el-form-item label="入库仓库" prop="warehouseId">
-            <el-select v-model="stockInForm.warehouseId" filterable placeholder="请选择入库仓库" style="width: 220px">
-              <el-option v-for="item in warehouseList" :key="item.id" :label="item.warehouseName" :value="item.id">
-                <span style="float: left">{{ item.warehouseName }}</span>
-                <span v-if="item.warehouseType=='LOCAL'" style="float: right; color: #8492a6; font-size: 13px">本地仓</span>
-                <span v-else-if="item.warehouseType=='JDYC' && item.jdlApiType==0" style="float: right; color: #8492a6; font-size: 13px">京东云仓-仓配一体</span>
-                <span v-else-if="item.warehouseType=='JDYC' && item.jdlApiType==1" style="float: right; color: #8492a6; font-size: 13px">京东云仓-ERP</span>
-                <span v-else-if="item.warehouseType=='JDYC'" style="float: right; color: #8492a6; font-size: 13px">京东云仓</span>
-                <span v-else-if="item.warehouseType=='JKYYC'" style="float: right; color: #8492a6; font-size: 13px">吉客云云仓</span>
-                <span v-else-if="item.warehouseType=='CLOUD'" style="float: right; color: #8492a6; font-size: 13px">系统云仓</span>
-                <span v-else style="float: right; color: #8492a6; font-size: 13px">未知仓</span>
-              </el-option>
-            </el-select>
-          </el-form-item>
-        </el-row>
       </el-form>
     </el-card>
 
@@ -142,8 +126,6 @@ import type { FormInstance } from 'element-plus'
 import { getPurchaseOrderShip, createStockInEntry } from '@/api/purchase/purchaseOrderShip'
 import { getPurchaseOrder } from '@/api/purchase/purchaseOrder'
 import { listAllSupplier } from '@/api/goods/supplier'
-import { myAvailableList } from '@/api/wms/warehouse'
-import { getUserProfile } from '@/api/system/user'
 import ImagePreview from '@/components/ImagePreview/index.vue'
 
 const route = useRoute()
@@ -176,19 +158,12 @@ const ship = reactive<Record<string, any>>({
 const stockInForm = reactive<Record<string, any>>({
   id: null,
   receiptTime: null,
-  warehouseId: null,
   remark: null
 })
 
 const itemList = ref<any[]>([])
 const supplierList = ref<any[]>([])
-const warehouseList = ref<any[]>([])
-
-const rules = reactive<Record<string, any>>({})
-
-const stockInRules = reactive<Record<string, any>>({
-  warehouseId: [{ required: true, trigger: 'blur', message: '请选择入库的仓库' }]
-})
+const stockInRules = reactive<Record<string, any>>({})
 
 const canCreateStockIn = computed(() => {
   return ship.status === 0 || ship.status === 1
@@ -212,20 +187,6 @@ function getDetail() {
   })
 }
 
-function loadWarehouses() {
-  getUserProfile().then((res: any) => {
-    if (res.data?.userType == 0 || !res.data?.userType) {
-      myAvailableList().then((response: any) => {
-        warehouseList.value = response.data || []
-      })
-    } else if (res.data?.userType == 20 || res.data?.userType == 40) {
-      myAvailableList().then((response: any) => {
-        warehouseList.value = response.data || []
-      })
-    }
-  })
-}
-
 function submitForm() {
   stockInFormRef.value?.validate((valid: boolean) => {
     if (valid) {
@@ -233,7 +194,6 @@ function submitForm() {
       const params = {
         id: stockInForm.id,
         receiptTime: stockInForm.receiptTime,
-        warehouseId: stockInForm.warehouseId,
         remark: stockInForm.remark,
         goodsList: itemList.value
       }
@@ -256,7 +216,6 @@ onMounted(() => {
   listAllSupplier({ pageIndex: 1, pageSize: 1000 }).then((response: any) => {
     supplierList.value = response.rows || []
   })
-  loadWarehouses()
   stockInForm.receiptTime = new Date().toISOString().slice(0, 10)
   getDetail()
 })

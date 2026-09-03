@@ -51,7 +51,7 @@ public class PurchaseOrderShipController extends BaseController
     public AjaxResult createStockInEntry(@RequestBody PurchaseOrderStockInBo bo)
     {
         if(bo.getId() == null) return AjaxResult.error("缺少参数id");
-        if(bo.getWarehouseId()==null) return AjaxResult.error("请选择仓库");
+
 
         bo.setCreateBy(getUsername());
         ResultVo<Long> result = shipService.createStockInEntry(bo, SecurityUtils.getUserId(),SecurityUtils.getUsername());

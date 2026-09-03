@@ -45,8 +45,8 @@
 
     <el-table v-loading="loading" :data="stockInEntryList" @selection-change="handleSelectionChange">
       <el-table-column label="ID" align="center" prop="id" width="60" />
-      <el-table-column label="单号" align="center" prop="stockInNum" width="160" />
-      <el-table-column label="来源单号" align="center" prop="sourceNo" width="160" />
+      <el-table-column label="单号" align="center" prop="stockInNum" width="220" />
+      <el-table-column label="来源单号" align="center" prop="sourceNo" width="220" />
       <el-table-column label="仓库" align="left" prop="warehouseName" width="150">
         <template #default="scope">{{ warehouseList.find((x:any)=>x.id===scope.row.warehouseId)?.warehouseName||'未知' }}</template>
       </el-table-column>
@@ -65,9 +65,9 @@
           <el-tag v-else-if="scope.row.stockInType===3" size="small">盘盈入库</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="商品数" align="center" prop="goodsUnit" width="60" />
-      <el-table-column label="规格数" align="center" prop="specUnit" width="60" />
-      <el-table-column label="总件数" align="center" prop="specUnitTotal" width="60" />
+<!--      <el-table-column label="商品数" align="center" prop="goodsUnit" width="60" />-->
+<!--      <el-table-column label="规格数" align="center" prop="specUnit" width="60" />-->
+<!--      <el-table-column label="总件数" align="center" prop="specUnitTotal" width="60" />-->
       <el-table-column label="备注" align="center" prop="remark" />
       <el-table-column label="状态" align="center" prop="status" width="120">
         <template #default="scope">

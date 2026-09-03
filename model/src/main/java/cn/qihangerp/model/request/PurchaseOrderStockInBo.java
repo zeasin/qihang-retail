@@ -17,7 +17,7 @@ public class PurchaseOrderStockInBo
     private static final long serialVersionUID = 1L;
 
     private Long id;//采购单id
-    private Long warehouseId;// 仓库id
+
 
     private String createBy;
     private String receiptTime;
