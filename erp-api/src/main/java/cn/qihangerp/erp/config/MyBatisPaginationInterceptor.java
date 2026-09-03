@@ -56,7 +56,29 @@ public class MyBatisPaginationInterceptor implements InnerInterceptor {
             System.err.println("COUNT查询失败: " + e.getMessage());
         }
 
-        // 2. LIMIT
+        // 2. ORDER BY（拼接 Page 中设置的排序，对应 PageQuery.build() 的 OrderItem）
+        java.util.List<com.baomidou.mybatisplus.core.metadata.OrderItem> orders = page.orders();
+        if (orders != null && !orders.isEmpty() && !containsOrderBy(originalSql)) {
+            StringBuilder orderBySql = new StringBuilder(" ORDER BY ");
+            for (int i = 0; i < orders.size(); i++) {
+                com.baomidou.mybatisplus.core.metadata.OrderItem item = orders.get(i);
+                String column = item.getColumn();
+                // 列名校验，防止SQL注入（仅允许字母数字、下划线、点）
+                if (column == null || !column.matches("[a-zA-Z0-9_.]+")) {
+                    continue;
+                }
+                if (orderBySql.length() > " ORDER BY ".length()) {
+                    orderBySql.append(", ");
+                }
+                orderBySql.append(column).append(item.isAsc() ? " ASC" : " DESC");
+            }
+            // 至少有一个合法的排序列才拼接
+            if (orderBySql.length() > " ORDER BY ".length()) {
+                originalSql = originalSql + orderBySql;
+            }
+        }
+
+        // 3. LIMIT
         long offset = (page.getCurrent() > 0) ? (page.getCurrent() - 1) * size : 0;
         try {
             java.lang.reflect.Field sqlField = BoundSql.class.getDeclaredField("sql");
@@ -65,6 +87,13 @@ public class MyBatisPaginationInterceptor implements InnerInterceptor {
         } catch (Exception e) {
             throw new RuntimeException("SQL分页改写失败", e);
         }
+    }
+
+    /**
+     * 判断SQL中是否已包含 ORDER BY（含子查询），已包含则不再追加，避免生成非法SQL
+     */
+    private boolean containsOrderBy(String sql) {
+        return sql == null || sql.toLowerCase().contains("order by");
     }
 
     private String buildCountSql(String sql) {
