@@ -127,7 +127,13 @@ public class ErpPurchaseOrderShipServiceImpl extends ServiceImpl<ErpPurchaseOrde
         ErpPurchaseOrderShip update = new ErpPurchaseOrderShip();
         update.setUpdateTime(DateUtils.getNowDate());
         update.setStockInTime(DateUtils.getNowDate());
-        update.setReceiptTime(bo.getReceiptTime());
+        if (bo.getReceiptTime() != null && !bo.getReceiptTime().isEmpty()) {
+            update.setReceiptTime(java.time.LocalDateTime.of(
+                java.time.LocalDate.parse(bo.getReceiptTime(), java.time.format.DateTimeFormatter.ISO_LOCAL_DATE),
+                java.time.LocalTime.MIN));
+        } else {
+            update.setReceiptTime(DateUtils.getNowDate());
+        }
         update.setRemark(bo.getRemark());
         update.setUpdateBy(bo.getCreateBy());
         update.setWarehouseId(warehouse.getId());
@@ -141,7 +147,13 @@ public class ErpPurchaseOrderShipServiceImpl extends ServiceImpl<ErpPurchaseOrde
         ErpPurchaseOrder order = new ErpPurchaseOrder();
         order.setId(ship.getOrderId());
         order.setStatus(3);
-        order.setReceivedTime(bo.getReceiptTime());
+        if (bo.getReceiptTime() != null && !bo.getReceiptTime().isEmpty()) {
+            order.setReceivedTime(java.time.LocalDateTime.of(
+                java.time.LocalDate.parse(bo.getReceiptTime(), java.time.format.DateTimeFormatter.ISO_LOCAL_DATE),
+                java.time.LocalTime.MIN));
+        } else {
+            order.setReceivedTime(DateUtils.getNowDate());
+        }
         order.setWarehouseId(warehouse.getId());
         order.setWarehouseType(warehouse.getWarehouseType());
         order.setWarehouseName(warehouse.getWarehouseName());

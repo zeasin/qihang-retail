@@ -10,7 +10,7 @@
         <el-input v-model="queryParams.orderNum" placeholder="请输入采购单号" clearable @keyup.enter="handleQuery" />
       </el-form-item>
       <el-form-item label="下单日期" prop="orderDate">
-        <el-date-picker clearable v-model="queryParams.orderDate" type="date" value-format="yyyy-MM-dd" placeholder="请选择下单日期" />
+        <el-date-picker clearable v-model="queryParams.orderDate" type="date" value-format="YYYY-MM-DD" placeholder="请选择下单日期" />
       </el-form-item>
       <el-form-item label="下单人" prop="createBy">
         <el-select v-model="queryParams.createBy" filterable @change="handleQuery" placeholder="请选择下单人">
@@ -82,7 +82,7 @@
           <el-input v-model="form.orderNum" disabled placeholder="请输入单号" />
         </el-form-item>
         <el-form-item label="下单日期" prop="orderDate">
-          <el-date-picker clearable v-model="form.orderDate" type="date" disabled value-format="yyyy-MM-dd" placeholder="请选择订单日期" />
+          <el-date-picker clearable v-model="form.orderDate" type="date" disabled value-format="YYYY-MM-DD" placeholder="请选择订单日期" />
         </el-form-item>
         <el-form-item label="创建时间" prop="orderTime">
           <el-input v-model="form.orderTime" disabled placeholder="请输入订单创建时间" />
@@ -94,7 +94,7 @@
           <el-input v-model="form.auditUser" placeholder="请输入采购单审核人" :disabled="form.optionType !== 'audit'" />
         </el-form-item>
         <el-form-item label="供应商发货时间" prop="supplierDeliveryTime" v-if="form.optionType === 'SupplierShip'">
-          <el-date-picker clearable v-model="form.supplierDeliveryTime" type="date" value-format="yyyy-MM-dd" placeholder="请选择供应商发货时间" />
+          <el-date-picker clearable v-model="form.supplierDeliveryTime" type="date" value-format="YYYY-MM-DD" placeholder="请选择供应商发货时间" />
         </el-form-item>
         <el-form-item label="物流公司" v-if="form.optionType === 'SupplierShip'">
           <el-select v-model="form.shipCompany" filterable placeholder="选择快递公司">

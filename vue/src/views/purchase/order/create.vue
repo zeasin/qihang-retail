@@ -8,7 +8,7 @@
       </el-form-item>
 
       <el-form-item label="采购日期" prop="orderDate">
-        <el-date-picker clearable v-model="form.orderDate" type="date" value-format="yyyy-MM-dd" placeholder="请选择订单日期" />
+        <el-date-picker clearable v-model="form.orderDate" type="date" value-format="YYYY-MM-DD" placeholder="请选择订单日期" />
       </el-form-item>
 
       <el-row>

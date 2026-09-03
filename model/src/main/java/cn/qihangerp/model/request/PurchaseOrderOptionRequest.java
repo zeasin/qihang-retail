@@ -1,7 +1,6 @@
 package cn.qihangerp.model.request;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 public class PurchaseOrderOptionRequest {
     private Long id;
@@ -12,7 +11,7 @@ public class PurchaseOrderOptionRequest {
     private String confirmUser;//采购单确认人
 
     // 供应商发货
-    private LocalDateTime supplierDeliveryTime;
+    private String supplierDeliveryTime;
     private String shipCompany;
     private String shipNo;
 
@@ -45,11 +44,11 @@ public class PurchaseOrderOptionRequest {
         this.totalAmount = totalAmount;
     }
 
-    public LocalDateTime getSupplierDeliveryTime() {
+    public String getSupplierDeliveryTime() {
         return supplierDeliveryTime;
     }
 
-    public void setSupplierDeliveryTime(LocalDateTime supplierDeliveryTime) {
+    public void setSupplierDeliveryTime(String supplierDeliveryTime) {
         this.supplierDeliveryTime = supplierDeliveryTime;
     }
 

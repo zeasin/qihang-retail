@@ -25,10 +25,10 @@
         </el-col>
         <el-col :span="24">
           <el-form-item label="采购日期" prop="orderDate">
-            <el-date-picker v-model="form.orderDate" clearable disabled type="date" value-format="yyyy-MM-dd" placeholder="请选择订单日期" style="width: 220px" />
+            <el-date-picker v-model="form.orderDate" clearable disabled type="date" value-format="YYYY-MM-DD" placeholder="请选择订单日期" style="width: 220px" />
           </el-form-item>
           <el-form-item label="发货日期">
-            <el-date-picker v-model="form.supplierDeliveryTime" clearable disabled type="date" value-format="yyyy-MM-dd" placeholder="" style="width: 220px" />
+            <el-date-picker v-model="form.supplierDeliveryTime" clearable disabled type="date" value-format="YYYY-MM-DD" placeholder="" style="width: 220px" />
           </el-form-item>
         </el-col>
         <el-col :span="24">
@@ -83,14 +83,14 @@
       </el-row>
     </el-card>
 
-    <el-card class="items-card" style="margin-top: 20px;" v-if="form.status < 2">
+    <el-card class="items-card" style="margin-top: 20px;" v-if="canCreateStockIn">
       <template #header>
         <span>生成入库单</span>
       </template>
       <el-form ref="stockInFormRef" :model="stockInForm" size="small" :rules="stockInRules" :inline="true" label-width="128px">
         <el-row style="margin-top: 20px">
           <el-form-item label="收货日期">
-            <el-date-picker v-model="stockInForm.receiptTime" clearable type="date" value-format="yyyy-MM-dd" placeholder="" style="width: 220px" />
+            <el-date-picker v-model="stockInForm.receiptTime" clearable type="date" value-format="YYYY-MM-DD" placeholder="" style="width: 220px" />
           </el-form-item>
         </el-row>
         <el-row>
@@ -118,17 +118,24 @@
     </el-card>
 
     <el-card class="items-card" style="margin-top: 20px;" v-else>
-      <el-tag>已入库</el-tag>
+      <el-empty>
+        <template #description>
+          <span v-if="ship.status === 0">待收货，请先确认收货后再入库</span>
+          <span v-else-if="ship.status === 1">已收货，可以入库</span>
+          <span v-else-if="ship.status === 2">已入库</span>
+          <span v-else>物流状态未知</span>
+        </template>
+      </el-empty>
     </el-card>
 
-    <div class="submit-bar" v-if="form.status < 2">
+    <div class="submit-bar" v-if="canCreateStockIn">
       <el-button type="primary" style="margin-left: 128px;" :loading="submitting" @click="submitForm">生成采购入库单</el-button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import type { FormInstance } from 'element-plus'
@@ -158,9 +165,12 @@ const form = reactive<Record<string, any>>({
 })
 
 const ship = reactive<Record<string, any>>({
+  id: null,
+  orderId: null,
   shipCompany: null,
   shipNum: null,
-  orderSpecUnitTotal: null
+  orderSpecUnitTotal: null,
+  status: null
 })
 
 const stockInForm = reactive<Record<string, any>>({
@@ -180,15 +190,25 @@ const stockInRules = reactive<Record<string, any>>({
   warehouseId: [{ required: true, trigger: 'blur', message: '请选择入库的仓库' }]
 })
 
+const canCreateStockIn = computed(() => {
+  return ship.status === 0 || ship.status === 1
+})
+
 function getDetail() {
-  stockInForm.id = route.query.id
-  getPurchaseOrder(stockInForm.id).then((res: any) => {
-    Object.assign(form, res.data || {})
-    itemList.value = res.data?.itemList || []
+  const id = route.query.id as string
+  stockInForm.id = id
+
+  getPurchaseOrderShip(id).then((response: any) => {
+    if (response.data) {
+      Object.assign(ship, response.data)
+    }
   })
 
-  getPurchaseOrderShip(stockInForm.id).then((response: any) => {
-    Object.assign(ship, response.data || {})
+  getPurchaseOrder(id).then((res: any) => {
+    if (res.data) {
+      Object.assign(form, res.data || {})
+      itemList.value = res.data?.itemList || []
+    }
   })
 }
 
@@ -220,7 +240,7 @@ function submitForm() {
       createStockInEntry(params).then((res: any) => {
         if (res.code === 200) {
           ElMessage.success('入库单创建成功')
-          router.push('/purchase/purchase_ship_list')
+          router.push('/purchase/purchase_stock_in_list')
         } else {
           ElMessage.error(res.msg || '创建失败')
           submitting.value = false

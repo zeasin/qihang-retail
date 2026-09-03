@@ -13,7 +13,7 @@
           <el-input v-model="inboundForm.supplierName" disabled />
         </el-form-item>
         <el-form-item label="入库日期">
-          <el-date-picker v-model="inboundForm.inboundDate" type="date" placeholder="选择日期" value-format="yyyy-MM-dd" />
+          <el-date-picker v-model="inboundForm.inboundDate" type="date" placeholder="选择日期" value-format="YYYY-MM-DD" />
         </el-form-item>
         <el-form-item label="备注">
           <el-input v-model="inboundForm.remark" type="textarea" rows="2" />

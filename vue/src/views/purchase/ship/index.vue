@@ -10,7 +10,7 @@
         <el-input v-model="queryParams.orderNum" placeholder="请输入采购单号" clearable @keyup.enter="handleQuery" />
       </el-form-item>
       <el-form-item label="供应商发货日期" prop="shipTime">
-        <el-date-picker clearable v-model="queryParams.shipTime" type="date" value-format="yyyy-MM-dd" placeholder="供应商发货日期" />
+        <el-date-picker clearable v-model="queryParams.shipTime" type="date" value-format="YYYY-MM-DD" placeholder="供应商发货日期" />
       </el-form-item>
       <el-form-item>
         <el-button type="primary" size="small" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
@@ -59,7 +59,8 @@
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
           <el-button size="small" type="text" @click="handleDetail(scope.row)"><el-icon><View /></el-icon>详情</el-button>
-          <el-button v-if="scope.row.status === 0" size="small" type="text" @click="handleCreateEntry(scope.row)"><el-icon><DocumentAdd /></el-icon>入库</el-button>
+          <el-button v-if="scope.row.status === 0" size="small" type="text" @click="handleConfirmReceipt(scope.row)"><el-icon><Check /></el-icon>收货</el-button>
+          <el-button v-if="scope.row.status === 1" size="small" type="text" @click="handleCreateEntry(scope.row)"><el-icon><DocumentAdd /></el-icon>入库</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -73,7 +74,7 @@
           <el-input v-model="form.orderNum" disabled placeholder="请输入采购订单编号" />
         </el-form-item>
         <el-form-item label="采购订单日期" prop="orderDate">
-          <el-date-picker clearable disabled v-model="form.orderDate" type="date" value-format="yyyy-MM-dd" placeholder="请选择采购订单日期" />
+          <el-date-picker clearable disabled v-model="form.orderDate" type="date" value-format="YYYY-MM-DD" placeholder="请选择采购订单日期" />
         </el-form-item>
         <el-form-item label="采购订单商品规格数" prop="orderSpecUnit">
           <el-input v-model="form.orderSpecUnit" disabled placeholder="请输入采购订单商品规格数" />
@@ -94,10 +95,10 @@
           <el-input v-model="form.freight" disabled placeholder="请输入运费" />
         </el-form-item>
         <el-form-item label="发货时间" prop="shipTime">
-          <el-date-picker clearable disabled v-model="form.shipTime" type="date" value-format="yyyy-MM-dd" placeholder="请选择发货时间" />
+          <el-date-picker clearable disabled v-model="form.shipTime" type="date" value-format="YYYY-MM-DD" placeholder="请选择发货时间" />
         </el-form-item>
         <el-form-item label="收货日期" prop="receiptTime">
-          <el-date-picker clearable v-model="form.receiptTime" type="date" value-format="yyyy-MM-dd" placeholder="请选择收货日期" />
+          <el-date-picker clearable v-model="form.receiptTime" type="date" value-format="YYYY-MM-DD" placeholder="请选择收货日期" />
         </el-form-item>
         <el-form-item label="备注" prop="remark">
           <el-input v-model="form.remark" placeholder="请输入备注" />
@@ -117,7 +118,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { Search, Refresh, View, DocumentAdd } from '@element-plus/icons-vue'
+import { Search, Refresh, View, DocumentAdd, Check } from '@element-plus/icons-vue'
 import type { FormInstance } from 'element-plus'
 import { listPurchaseOrderShip, getPurchaseOrderShip, confirmReceipt } from '@/api/purchase/purchaseOrderShip'
 import { listSupplier } from '@/api/goods/supplier'

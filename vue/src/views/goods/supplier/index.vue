@@ -85,7 +85,7 @@
           <image-upload v-model="form.bl" :limit="1" />
         </el-form-item>
         <el-form-item label="营业执照有效期" prop="blPeriod">
-          <el-date-picker clearable v-model="form.blPeriod" value-format="yyyy-MM-dd" type="date" />
+          <el-date-picker clearable v-model="form.blPeriod" value-format="YYYY-MM-DD" type="date" />
         </el-form-item>
         <el-form-item label="法人" prop="blFaren">
           <el-input v-model="form.blFaren" placeholder="请输入法人" />

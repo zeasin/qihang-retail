@@ -3,7 +3,6 @@ package cn.qihangerp.model.request;
 
 import lombok.Data;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -21,7 +20,7 @@ public class PurchaseOrderStockInBo
     private Long warehouseId;// 仓库id
 
     private String createBy;
-    private LocalDateTime receiptTime;
+    private String receiptTime;
     private String remark;
 
 
