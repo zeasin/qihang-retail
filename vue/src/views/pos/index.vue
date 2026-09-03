@@ -339,7 +339,7 @@ import {
   ShoppingCart, Delete, Wallet, CreditCard, Money, CircleCheckFilled,
   CollectionTag, Postcard, Box
 } from '@element-plus/icons-vue'
-import { getGoodsList, getSkuInventory, getSkuInventoryBatches } from '@/api/pos/pos'
+import { getGoodsList, getSkuInventory, getSkuInventoryBatches, batchSkuInventory } from '@/api/pos/pos'
 import { listCategory } from '@/api/goods/category'
 import { addOrder } from '@/api/order/salesOrder'
 
@@ -485,10 +485,48 @@ async function loadProducts(reset = true) {
     const list = res.rows || []
     products.value = reset ? list : [...products.value, ...list]
     hasMore.value = list.length >= 24
+    preloadInventory()
   } catch (e) {
     console.error(e)
   } finally {
     loading.value = false
+  }
+}
+
+async function preloadInventory() {
+  const skuIds: string[] = []
+  for (const p of products.value) {
+    if (p.skuList) {
+      for (const sku of p.skuList) {
+        skuIds.push(sku.id)
+      }
+    }
+  }
+  if (skuIds.length === 0) return
+  try {
+    const res: any = await batchSkuInventory(skuIds)
+    const invMap = res.data?.inventory || {}
+    const batchMap = res.data?.batches || {}
+    for (const p of products.value) {
+      if (p.skuList) {
+        for (const sku of p.skuList) {
+          const inv = invMap[sku.id]
+          if (inv) {
+            sku.inventory = {
+              skuId: sku.id,
+              quantity: inv.quantity || 0,
+              availableQuantity: inv.availableQuantity || 0
+            }
+          }
+          const batches = batchMap[sku.id]
+          if (batches && batches.length > 0) {
+            sku.batches = batches
+          }
+        }
+      }
+    }
+  } catch (e) {
+    console.error('批量加载库存失败', e)
   }
 }
 
@@ -534,9 +572,25 @@ async function handleProductClick(product: Product) {
     selectedProduct.value = product
     selectedSku.value = null
     
-    for (const sku of product.skuList) {
-      if (!sku.inventory || !sku.batches) {
-        await loadSkuInventory(sku)
+    const needLoad = product.skuList.filter(sku => !sku.inventory || !sku.batches)
+    if (needLoad.length > 0) {
+      const skuIds = needLoad.map(sku => sku.id)
+      try {
+        const res: any = await batchSkuInventory(skuIds)
+        const invMap = res.data?.inventory || {}
+        const batchMap = res.data?.batches || {}
+        for (const sku of needLoad) {
+          const inv = invMap[sku.id]
+          if (inv) {
+            sku.inventory = { skuId: sku.id, quantity: inv.quantity || 0, availableQuantity: inv.availableQuantity || 0 }
+          }
+          const batches = batchMap[sku.id]
+          if (batches && batches.length > 0) {
+            sku.batches = batches
+          }
+        }
+      } catch (e) {
+        console.error('批量加载库存失败', e)
       }
     }
     
@@ -555,6 +609,11 @@ async function confirmSkuSelect() {
   
   const sku = selectedSku.value
   const product = selectedProduct.value
+
+  if (!sku.inventory || sku.inventory.availableQuantity <= 0) {
+    ElMessage.warning('该商品无库存')
+    return
+  }
   
   const firstBatch = sku.batches && sku.batches.length > 0 ? sku.batches[0] : undefined
   await addToCartWithSku(product, sku, firstBatch)
@@ -569,6 +628,11 @@ async function addToCart(product: Product) {
   
   if (!sku.inventory) {
     await loadSkuInventory(sku)
+  }
+  
+  if (!sku.inventory || sku.inventory.availableQuantity <= 0) {
+    ElMessage.warning('该商品无库存')
+    return
   }
   
   const firstBatch = sku.batches && sku.batches.length > 0 ? sku.batches[0] : undefined
@@ -600,10 +664,25 @@ function closeDialogs() {
   selectedSku.value = null
 }
 
+function getAvailableQty(skuId: string): number {
+  for (const p of products.value) {
+    if (!p.skuList) continue
+    const sku = p.skuList.find((s: SkuItem) => s.id === skuId)
+    if (sku?.inventory) return sku.inventory.availableQuantity ?? 0
+  }
+  return 0
+}
+
 function addToCartWithItem(item: any) {
-  const idx = cartItems.value.findIndex(i => 
+  const idx = cartItems.value.findIndex(i =>
     i.goodsId === item.goodsId && i.skuId === item.skuId && i.barCode === item.barCode
   )
+  const cartQty = idx > -1 ? cartItems.value[idx].quantity : 0
+  const avail = getAvailableQty(item.skuId)
+  if (avail > 0 && cartQty + 1 > avail) {
+    ElMessage.warning('已超出可用库存')
+    return
+  }
   if (idx > -1) {
     cartItems.value[idx].quantity++
   } else {
@@ -616,7 +695,13 @@ function addToCartWithItem(item: any) {
 }
 
 function increaseQty(idx: number) {
-  cartItems.value[idx].quantity++
+  const item = cartItems.value[idx]
+  const avail = getAvailableQty(item.skuId)
+  if (avail > 0 && item.quantity + 1 > avail) {
+    ElMessage.warning('已超出可用库存')
+    return
+  }
+  item.quantity++
 }
 
 function decreaseQty(idx: number) {

@@ -79,3 +79,7 @@ export function getSkuInventory(skuId: number | string) {
 export function getSkuInventoryBatches(skuId: number | string) {
   return request({ url: '/pos-api/inventory/sku/' + skuId + '/batches', method: 'get' })
 }
+
+export function batchSkuInventory(skuIds: (number | string)[]) {
+  return request({ url: '/pos-api/inventory/batch', method: 'post', data: skuIds })
+}
