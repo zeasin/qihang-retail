@@ -117,8 +117,8 @@ public class ErpPurchaseOrderServiceImpl extends ServiceImpl<ErpPurchaseOrderMap
 
         // 添加主表
         ErpPurchaseOrder erpPurchaseOrder = new ErpPurchaseOrder();
-        erpPurchaseOrder.setMerchantId(addBo.getMerchantId());
-        erpPurchaseOrder.setShopId(addBo.getShopId());
+        erpPurchaseOrder.setMerchantId(0L);
+        erpPurchaseOrder.setShopId(0L);
         erpPurchaseOrder.setOrderNum("PUR"+ DateUtils.parseDateToStr("yyyyMMddHHmmss",LocalDateTime.now()));
         erpPurchaseOrder.setOrderAmount(addBo.getOrderAmount());
         erpPurchaseOrder.setCreateTime(DateUtils.getNowDate());
@@ -148,8 +148,8 @@ public class ErpPurchaseOrderServiceImpl extends ServiceImpl<ErpPurchaseOrderMap
             ErpPurchaseOrderItem orderItem = new ErpPurchaseOrderItem();
             orderItem.setOrderDate(addBo.getOrderDate());
             orderItem.setOrderId(erpPurchaseOrder.getId());
-            orderItem.setMerchantId(addBo.getMerchantId());
-            orderItem.setShopId(addBo.getShopId());
+            orderItem.setMerchantId(erpPurchaseOrder.getMerchantId());
+            orderItem.setShopId(erpPurchaseOrder.getShopId());
             orderItem.setOrderNum(erpPurchaseOrder.getOrderNum());
             if(item.getAmount()!=null) {
                 orderItem.setAmount(item.getAmount().doubleValue());

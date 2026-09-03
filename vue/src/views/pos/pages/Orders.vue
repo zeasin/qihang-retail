@@ -4,7 +4,7 @@
       <div class="search-bar">
         <el-input
           v-model="searchKeyword"
-          placeholder="搜索订单号/会员..."
+          placeholder="搜索订单号..."
           clearable
           @keyup.enter="handleSearch"
         >
@@ -32,30 +32,30 @@
     </div>
 
     <el-table v-loading="loading" :data="orderList" stripe>
-      <el-table-column prop="orderNo" label="订单号" width="180">
+      <el-table-column prop="orderNum" label="订单号" width="180">
         <template #default="{ row }">
-          <span class="order-no" @click="viewDetail(row)">{{ row.orderNo || row.id }}</span>
+          <span class="order-no" @click="viewDetail(row)">{{ row.orderNum || row.id }}</span>
         </template>
       </el-table-column>
-      <el-table-column prop="createTime" label="下单时间" width="180" />
-      <el-table-column prop="memberName" label="会员" width="120">
+      <el-table-column prop="orderTime" label="下单时间" width="180" />
+      <el-table-column prop="receiverName" label="会员" width="120">
         <template #default="{ row }">
-          {{ row.memberName || '散客' }}
+          {{ row.receiverName || '散客' }}
         </template>
       </el-table-column>
-      <el-table-column prop="totalAmount" label="金额" width="120" align="right">
+      <el-table-column prop="payment" label="金额" width="120" align="right">
         <template #default="{ row }">
-          <span class="amount">¥{{ formatAmount(row.totalAmount || row.payAmount) }}</span>
+          <span class="amount">¥{{ formatAmount(row.payment || row.amount) }}</span>
         </template>
       </el-table-column>
-      <el-table-column prop="payMethod" label="支付方式" width="100">
+      <el-table-column prop="deliveryMethod" label="配送方式" width="100">
         <template #default="{ row }">
-          <el-tag :type="getPayMethodType(row.payMethod)">{{ getPayMethodName(row.payMethod) }}</el-tag>
+          <el-tag :type="getDeliveryMethodType(row.deliveryMethod)">{{ getDeliveryMethodName(row.deliveryMethod) }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="status" label="状态" width="100">
+      <el-table-column prop="orderStatus" label="状态" width="100">
         <template #default="{ row }">
-          <el-tag :type="getStatusType(row.status)">{{ getStatusName(row.status) }}</el-tag>
+          <el-tag :type="getStatusType(row.orderStatus)">{{ getStatusName(row.orderStatus) }}</el-tag>
         </template>
       </el-table-column>
       <el-table-column label="操作" width="150" fixed="right">
@@ -89,27 +89,27 @@
     <el-dialog v-model="showDetailDialog" title="订单详情" width="600px">
       <div class="order-detail" v-if="currentOrder">
         <el-descriptions :column="2" border>
-          <el-descriptions-item label="订单号">{{ currentOrder.orderNo || currentOrder.id }}</el-descriptions-item>
-          <el-descriptions-item label="下单时间">{{ currentOrder.createTime }}</el-descriptions-item>
-          <el-descriptions-item label="会员">{{ currentOrder.memberName || '散客' }}</el-descriptions-item>
-          <el-descriptions-item label="支付方式">{{ getPayMethodName(currentOrder.payMethod) }}</el-descriptions-item>
+          <el-descriptions-item label="订单号">{{ currentOrder.orderNum || currentOrder.id }}</el-descriptions-item>
+          <el-descriptions-item label="下单时间">{{ currentOrder.orderTime }}</el-descriptions-item>
+          <el-descriptions-item label="会员">{{ currentOrder.receiverName || '散客' }}</el-descriptions-item>
+          <el-descriptions-item label="配送方式">{{ getDeliveryMethodName(currentOrder.deliveryMethod) }}</el-descriptions-item>
           <el-descriptions-item label="订单金额">
-            <span class="amount">¥{{ formatAmount(currentOrder.totalAmount || currentOrder.payAmount) }}</span>
+            <span class="amount">¥{{ formatAmount(currentOrder.payment || currentOrder.amount) }}</span>
           </el-descriptions-item>
           <el-descriptions-item label="状态">
-            <el-tag :type="getStatusType(currentOrder.status)">{{ getStatusName(currentOrder.status) }}</el-tag>
+            <el-tag :type="getStatusType(currentOrder.orderStatus)">{{ getStatusName(currentOrder.orderStatus) }}</el-tag>
           </el-descriptions-item>
         </el-descriptions>
 
         <h4 class="items-title">商品明细</h4>
-        <el-table :data="currentOrder.items || currentOrder.orderItems" size="small">
-          <el-table-column prop="goodsName" label="商品名称" />
-          <el-table-column prop="price" label="单价" width="100" align="right">
-            <template #default="{ row }">¥{{ formatAmount(row.price) }}</template>
+        <el-table :data="currentOrder.itemList || []" size="small">
+          <el-table-column prop="goodsTitle" label="商品名称" />
+          <el-table-column prop="goodsPrice" label="单价" width="100" align="right">
+            <template #default="{ row }">¥{{ formatAmount(row.goodsPrice) }}</template>
           </el-table-column>
           <el-table-column prop="quantity" label="数量" width="80" align="center" />
           <el-table-column label="小计" width="100" align="right">
-            <template #default="{ row }">¥{{ formatAmount((row.price || 0) * row.quantity) }}</template>
+            <template #default="{ row }">¥{{ formatAmount(row.itemAmount || (row.goodsPrice * row.quantity)) }}</template>
           </el-table-column>
         </el-table>
       </div>
@@ -177,14 +177,14 @@ async function loadOrders() {
       pageSize: pageSize.value,
     }
     if (searchKeyword.value) {
-      params.keyword = searchKeyword.value
+      params.orderNum = searchKeyword.value
     }
     if (dateRange.value && dateRange.value.length === 2) {
-      params.startDate = dateRange.value[0]
-      params.endDate = dateRange.value[1]
+      params.startTime = dateRange.value[0]
+      params.endTime = dateRange.value[1]
     }
     const res: any = await getOrderList(params)
-    orderList.value = res.rows || res.data || []
+    orderList.value = res.rows || []
     total.value = res.total || 0
   } catch (e) {
     console.error(e)
@@ -219,16 +219,17 @@ async function viewDetail(row: any) {
 }
 
 function canRefund(row: any) {
-  return row.status === 1 || row.status === 'PAID' || row.status === 'COMPLETED'
+  // 1待发货 / 2已发货 / 3已完成 可退款
+  return row.orderStatus === 1 || row.orderStatus === 2 || row.orderStatus === 3
 }
 
 function handleRefund(row: any) {
   refundForm.value = {
-    amount: row.totalAmount || row.payAmount || 0,
+    amount: row.payment || row.amount || 0,
     method: 'ORIGINAL',
     reason: '',
     orderId: row.id,
-    maxAmount: row.totalAmount || row.payAmount || 0,
+    maxAmount: row.payment || row.amount || 0,
   }
   showRefundDialog.value = true
 }
@@ -262,56 +263,50 @@ function formatAmount(amount: any) {
   return Number(amount).toFixed(2)
 }
 
-function getPayMethodName(method: string) {
+function getDeliveryMethodName(method: number | string) {
   const map: Record<string, string> = {
-    CASH: '现金',
-    WECHAT: '微信',
-    ALIPAY: '支付宝',
-    BANK_CARD: '银行卡',
-    MEMBER_BALANCE: '会员余额',
+    1: '现结',
+    2: '到店自提',
+    3: '商家配送',
+    4: '骑手配送',
   }
-  return map[method] || method || '-'
+  return map[String(method)] || '-'
 }
 
-function getPayMethodType(method: string) {
+function getDeliveryMethodType(method: number | string) {
   const map: Record<string, string> = {
-    CASH: 'success',
-    WECHAT: 'primary',
-    ALIPAY: 'warning',
-    BANK_CARD: 'info',
-    MEMBER_BALANCE: '',
+    1: 'success',
+    2: 'primary',
+    3: 'warning',
+    4: 'info',
   }
-  return map[method] || 'info'
+  return map[String(method)] || 'info'
 }
 
 function getStatusName(status: number | string) {
   const map: Record<string, string> = {
-    0: '待支付',
-    1: '已支付',
-    2: '已完成',
-    3: '已取消',
-    4: '已退款',
-    PENDING: '待支付',
-    PAID: '已支付',
-    COMPLETED: '已完成',
-    CANCELLED: '已取消',
-    REFUNDED: '已退款',
+    0: '新订单',
+    1: '待发货',
+    2: '已发货',
+    3: '已完成',
+    11: '已取消',
+    12: '退款中',
+    13: '已关闭',
+    21: '待付款',
   }
   return map[String(status)] || status || '-'
 }
 
 function getStatusType(status: number | string) {
   const map: Record<string, string> = {
-    0: 'warning',
-    1: 'success',
-    2: '',
-    3: 'info',
-    4: 'danger',
-    PENDING: 'warning',
-    PAID: 'success',
-    COMPLETED: '',
-    CANCELLED: 'info',
-    REFUNDED: 'danger',
+    0: 'info',
+    1: 'warning',
+    2: 'primary',
+    3: 'success',
+    11: 'danger',
+    12: 'warning',
+    13: 'danger',
+    21: 'info',
   }
   return map[String(status)] || 'info'
 }

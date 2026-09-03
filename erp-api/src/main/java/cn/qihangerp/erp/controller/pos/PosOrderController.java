@@ -4,46 +4,43 @@ import cn.qihangerp.common.AjaxResult;
 import cn.qihangerp.common.PageQuery;
 import cn.qihangerp.common.PageResult;
 import cn.qihangerp.common.TableDataInfo;
-import cn.qihangerp.model.entity.ErpSalesOrder;
-import cn.qihangerp.model.entity.ErpSalesOrderItem;
+import cn.qihangerp.model.entity.OOrder;
+import cn.qihangerp.request.OrderSearchRequest;
 import cn.qihangerp.security.common.BaseController;
-import cn.qihangerp.service.ErpSalesOrderService;
+import cn.qihangerp.service.OOrderService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 /**
- * 销售单查询Controller（POS收银用）
- * 复用 erp_sales_order + erp_sales_order_item 表
+ * POS订单查询Controller
+ * 数据源：o_order（order_source = POS）
  */
 @AllArgsConstructor
 @RestController
 @RequestMapping("/pos-api/order")
 public class PosOrderController extends BaseController {
 
-    private final ErpSalesOrderService salesOrderService;
+    private final OOrderService orderService;
 
     /**
-     * 查询销售单列表
+     * 查询POS订单列表（仅 order_source = POS）
      */
     @GetMapping("/list")
-    public TableDataInfo list(ErpSalesOrder query, PageQuery pageQuery) {
-        PageResult<ErpSalesOrder> pageList = salesOrderService.queryPageList(query, pageQuery);
+    public TableDataInfo list(OrderSearchRequest bo, PageQuery pageQuery) {
+        bo.setOrderSource("POS");
+        PageResult<OOrder> pageList = orderService.queryPageList(bo, pageQuery);
         return getDataTable(pageList);
     }
 
     /**
-     * 查询销售单详情
+     * 查询POS订单详情（含明细）
      */
     @GetMapping("/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id) {
-        ErpSalesOrder order = salesOrderService.getById(id);
+        OOrder order = orderService.queryDetailById(id);
         if (order == null) {
-            return AjaxResult.error("销售单不存在");
+            return AjaxResult.error("订单不存在");
         }
-        List<ErpSalesOrderItem> items = salesOrderService.selectItemsByOrderId(id);
-        order.setItems(items);
         return success(order);
     }
 
@@ -52,8 +49,7 @@ public class PosOrderController extends BaseController {
      */
     @GetMapping("/today")
     public AjaxResult todayStats(@RequestParam Long shopId) {
-        // TODO: 实现今日销售统计
-        // 总销售额、总订单数、总会员数
+        // TODO: 实现今日销售统计（基于 o_order order_source=POS）
         return success("今日统计功能待实现");
     }
 
@@ -62,7 +58,7 @@ public class PosOrderController extends BaseController {
      */
     @GetMapping("/daily")
     public AjaxResult dailyReport(@RequestParam Long shopId, @RequestParam String date) {
-        // TODO: 实现销售日报
+        // TODO: 实现销售日报（基于 o_order order_source=POS）
         return success("日报功能待实现");
     }
 }

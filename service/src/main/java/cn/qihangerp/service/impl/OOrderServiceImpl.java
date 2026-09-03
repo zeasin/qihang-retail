@@ -73,6 +73,7 @@ public class OOrderServiceImpl extends ServiceImpl<OOrderMapper, OOrder>
                 .eq(bo.getShopId() != null, OOrder::getShopId, bo.getShopId())
                 .eq(bo.getMerchantId() != null, OOrder::getMerchantId, bo.getMerchantId())
                 .eq(org.springframework.util.StringUtils.hasText(bo.getOrderNum()), OOrder::getOrderNum, bo.getOrderNum())
+                .eq(org.springframework.util.StringUtils.hasText(bo.getOrderSource()), OOrder::getOrderSource, bo.getOrderSource())
                 .eq(bo.getOrderStatus() != null, OOrder::getOrderStatus, bo.getOrderStatus())
 //                .eq(bo.getRefundStatus()!=null,OOrder::getRefundStatus,bo.getRefundStatus())
                 .eq(bo.getShopType() != null, OOrder::getShopType, bo.getShopType())

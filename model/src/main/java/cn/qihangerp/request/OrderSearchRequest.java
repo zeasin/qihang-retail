@@ -10,6 +10,10 @@ public class OrderSearchRequest {
     private Integer shopType;
 //    private Integer platformId;
     private String orderNum;
+    /**
+     * 订单来源：POS=POS收银、MT_FLASH=美团闪购、MT_WM=美团外卖、JD_DJ=京东到家等
+     */
+    private String orderSource;
     private Integer orderStatus;
     private Integer refundStatus;
     private String startTime;
