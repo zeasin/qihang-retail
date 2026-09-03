@@ -1,6 +1,7 @@
 package cn.qihangerp.model.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
@@ -75,4 +76,10 @@ public class OGoodsInventory {
 
     /** 更新人 */
     private String updateBy;
+
+    @TableField(exist = false)
+    private String warehouseName;
+
+    @TableField(exist = false)
+    private String warehouseType;
 }

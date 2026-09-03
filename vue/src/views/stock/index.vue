@@ -34,7 +34,7 @@
     <el-table v-loading="loading" :data="goodsInventoryList" border stripe>
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="ID" align="center" prop="id" width="60" />
-      <el-table-column label="SKU ID" align="center" prop="skuId" width="70" />
+      <el-table-column label="SKU ID" align="center" prop="skuId" width="100" />
       <el-table-column label="商品编码" align="center" prop="goodsNum" width="110" />
       <el-table-column label="SKU编码" align="center" prop="skuCode" width="120" />
       <el-table-column label="商品名称" align="left" prop="goodsName" min-width="160" show-overflow-tooltip />
@@ -106,7 +106,7 @@ function handleSelectionChange(selection:any[]){ids.length=0;ids.push(...selecti
 function handleExport(){ElMessage.info('导出功能')}
 function handleViewBatch(row:any){
   getGoodsStockBatch(row.id).then((res:any)=>{
-    batchList.value=res.data?.detailList||res.data?.items||res.rows||[]
+    batchList.value=Array.isArray(res.data)?res.data:(res.data?.detailList||res.data?.items||res.rows||[])
     batchOpen.value=true
   }).catch(()=>{ElMessage.error('加载批次明细失败')})
 }
