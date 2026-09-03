@@ -606,6 +606,11 @@ public class OOrderServiceImpl extends ServiceImpl<OOrderMapper, OOrder>
             new LambdaQueryWrapper<OOrderItem>().eq(OOrderItem::getOrderId, orderId));
     }
 
+    @Override
+    public void updateOrderItem(OOrderItem orderItem) {
+        orderItemMapper.updateById(orderItem);
+    }
+
 }
 
 

@@ -99,4 +99,9 @@ public interface OOrderService extends IService<OOrder> {
      * 查询订单明细列表
      */
     List<OOrderItem> selectItemsByOrderId(String orderId);
+
+    /**
+     * 更新订单明细
+     */
+    void updateOrderItem(OOrderItem orderItem);
 }

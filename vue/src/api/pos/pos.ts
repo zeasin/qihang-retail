@@ -33,15 +33,23 @@ export function getPosOrder(id: number | string) {
 }
 
 export function refundOrder(data: Record<string, any>) {
-  return request({ url: '/pos-api/cashier/refund', method: 'post', data })
+  return request({ url: '/pos-api/refund', method: 'post', data })
+}
+
+export function getRefundableOrders(query?: Record<string, any>) {
+  return request({ url: '/pos-api/refund/list', method: 'get', params: query })
+}
+
+export function getRefundRecords(query?: Record<string, any>) {
+  return request({ url: '/pos-api/refund/records', method: 'get', params: query })
 }
 
 export function getOrderList(query?: Record<string, any>) {
-  return request({ url: '/pos-api/order/list', method: 'get', params: query })
+  return request({ url: '/pos-api/cashier/order/list', method: 'get', params: query })
 }
 
 export function getOrder(id: number | string) {
-  return request({ url: '/pos-api/order/' + id, method: 'get' })
+  return request({ url: '/pos-api/cashier/order/' + id, method: 'get' })
 }
 
 export function getTodayStats(shopId: number) {
