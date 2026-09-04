@@ -8,6 +8,7 @@ import cn.qihangerp.model.entity.OOrder;
 import cn.qihangerp.model.entity.OOrderItem;
 import cn.qihangerp.model.request.ShipDeliveryRequest;
 import cn.qihangerp.model.request.ShipStockingSearchRequest;
+import cn.qihangerp.model.vo.ShipStockingStatsVo;
 import cn.qihangerp.service.OOrderService;
 import cn.qihangerp.service.ShipStockingService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -20,9 +21,7 @@ import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @AllArgsConstructor
@@ -130,13 +129,13 @@ public class ShipStockingServiceImpl implements ShipStockingService {
     }
 
     @Override
-    public Map<String, Object> getStats() {
-        Map<String, Object> stats = new HashMap<>();
+    public ShipStockingStatsVo getStats() {
+        ShipStockingStatsVo stats = new ShipStockingStatsVo();
 
         long pendingCount = orderService.count(new LambdaQueryWrapper<OOrder>()
                 .eq(OOrder::getShipStatus, 0)
                 .in(OOrder::getOrderStatus, 0, 1, 2, 3));
-        stats.put("pendingCount", pendingCount);
+        stats.setPendingCount(pendingCount);
 
         LocalDateTime todayStart = LocalDate.now().atStartOfDay();
         LocalDateTime todayEnd = LocalDate.now().atTime(23, 59, 59);
@@ -144,25 +143,25 @@ public class ShipStockingServiceImpl implements ShipStockingService {
                 .eq(OOrder::getShipStatus, 2)
                 .ge(OOrder::getUpdateTime, todayStart)
                 .le(OOrder::getUpdateTime, todayEnd));
-        stats.put("todayShipped", todayShipped);
+        stats.setTodayShipped(todayShipped);
 
         long riderCount = orderService.count(new LambdaQueryWrapper<OOrder>()
                 .eq(OOrder::getShipStatus, 0)
                 .eq(OOrder::getDeliveryMethod, EnumDeliveryMethod.RIDER.getCode())
                 .in(OOrder::getOrderStatus, 0, 1, 2, 3));
-        stats.put("riderCount", riderCount);
+        stats.setRiderCount(riderCount);
 
         long merchantCount = orderService.count(new LambdaQueryWrapper<OOrder>()
                 .eq(OOrder::getShipStatus, 0)
                 .eq(OOrder::getDeliveryMethod, EnumDeliveryMethod.MERCHANT.getCode())
                 .in(OOrder::getOrderStatus, 0, 1, 2, 3));
-        stats.put("merchantCount", merchantCount);
+        stats.setMerchantCount(merchantCount);
 
         long pickupCount = orderService.count(new LambdaQueryWrapper<OOrder>()
                 .eq(OOrder::getShipStatus, 0)
                 .eq(OOrder::getDeliveryMethod, EnumDeliveryMethod.PICKUP.getCode())
                 .in(OOrder::getOrderStatus, 0, 1, 2, 3));
-        stats.put("pickupCount", pickupCount);
+        stats.setPickupCount(pickupCount);
 
         return stats;
     }

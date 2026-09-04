@@ -40,6 +40,7 @@ npm run build    # vue-tsc 类型检查 + vite build
 - API 统一返回 `ResultVo<T>`，分页用 `PageQuery` / `PageResult<T>`
 - Service 接口以 `I` 开头（`IUserService`），`@Autowired` 注入
 - 时间戳字段: `createTime` / `updateTime`（LocalDateTime）
+- **禁止返回 `Map<String, Object>`**：Service 接口返回值必须使用固定实体类（VO/DTO），不允许用 Map 作为返回类型。统计数据用 `XxxStatsVo`，配置数据用 `XxxConfigVo`。Controller 层同样禁止返回 `Map<String, Object>`，必须返回明确的实体类型。
 
 ## MyBatis-Plus 使用规范（重要）
 

@@ -17,7 +17,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * 售后台账 Controller
@@ -126,8 +125,7 @@ public class AfterSaleController extends BaseController {
      */
     @GetMapping("/stats")
     public AjaxResult stats() {
-        Map<String, Object> stats = refundService.getAfterSaleStats();
-        return AjaxResult.success(stats);
+        return AjaxResult.success(refundService.getAfterSaleStats());
     }
 
     /**

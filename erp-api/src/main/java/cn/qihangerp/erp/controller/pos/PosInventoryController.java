@@ -3,6 +3,7 @@ package cn.qihangerp.erp.controller.pos;
 import cn.qihangerp.common.AjaxResult;
 import cn.qihangerp.model.entity.OGoodsInventory;
 import cn.qihangerp.model.entity.OGoodsInventoryBatch;
+import cn.qihangerp.model.vo.PosBatchInventoryVo;
 import cn.qihangerp.security.common.BaseController;
 import cn.qihangerp.service.OGoodsInventoryBatchService;
 import cn.qihangerp.service.OGoodsInventoryService;
@@ -62,13 +63,13 @@ public class PosInventoryController extends BaseController {
         Map<Long, List<OGoodsInventoryBatch>> batchMap = batchList.stream()
             .collect(Collectors.groupingBy(OGoodsInventoryBatch::getSkuId));
 
-        Map<String, Object> result = new HashMap<>();
+        PosBatchInventoryVo result = new PosBatchInventoryVo();
         Map<String, OGoodsInventory> invResult = new HashMap<>();
         invMap.forEach((k, v) -> invResult.put(String.valueOf(k), v));
         Map<String, List<OGoodsInventoryBatch>> batchResult = new HashMap<>();
         batchMap.forEach((k, v) -> batchResult.put(String.valueOf(k), v));
-        result.put("inventory", invResult);
-        result.put("batches", batchResult);
+        result.setInventory(invResult);
+        result.setBatches(batchResult);
         return success(result);
     }
 }

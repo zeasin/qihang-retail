@@ -8,9 +8,9 @@ import cn.qihangerp.model.request.AfterSaleApplyRequest;
 import cn.qihangerp.model.request.AfterSaleAuditRequest;
 import cn.qihangerp.model.request.AfterSaleProcessRequest;
 import cn.qihangerp.model.request.AfterSaleSearchRequest;
+import cn.qihangerp.model.vo.AfterSaleStatsVo;
+import cn.qihangerp.model.vo.AfterSaleConfigVo;
 import com.baomidou.mybatisplus.extension.service.IService;
-
-import java.util.Map;
 
 /**
  * 售后退款服务接口
@@ -65,10 +65,10 @@ public interface ORefundService extends IService<ORefund> {
     /**
      * 台账统计
      */
-    Map<String, Object> getAfterSaleStats();
+    AfterSaleStatsVo getAfterSaleStats();
 
     /**
      * 获取售后配置（授权期、审核阈值、退货原因）
      */
-    Map<String, Object> getAfterSaleConfig();
+    AfterSaleConfigVo getAfterSaleConfig();
 }

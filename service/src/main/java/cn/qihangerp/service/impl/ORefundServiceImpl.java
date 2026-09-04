@@ -11,6 +11,8 @@ import cn.qihangerp.model.request.AfterSaleApplyRequest;
 import cn.qihangerp.model.request.AfterSaleAuditRequest;
 import cn.qihangerp.model.request.AfterSaleProcessRequest;
 import cn.qihangerp.model.request.AfterSaleSearchRequest;
+import cn.qihangerp.model.vo.AfterSaleConfigVo;
+import cn.qihangerp.model.vo.AfterSaleStatsVo;
 import cn.qihangerp.mapper.OOrderItemMapper;
 import cn.qihangerp.service.*;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -25,9 +27,7 @@ import org.springframework.util.StringUtils;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 售后退款服务实现
@@ -371,15 +371,15 @@ public class ORefundServiceImpl extends ServiceImpl<ORefundMapper, ORefund> impl
     }
 
     @Override
-    public Map<String, Object> getAfterSaleStats() {
-        Map<String, Object> stats = new HashMap<>();
+    public AfterSaleStatsVo getAfterSaleStats() {
+        AfterSaleStatsVo stats = new AfterSaleStatsVo();
         LocalDateTime todayStart = LocalDate.now().atStartOfDay();
         LocalDateTime todayEnd = LocalDate.now().atTime(23, 59, 59);
 
         long todayCount = this.count(new LambdaQueryWrapper<ORefund>()
                 .ge(ORefund::getCreateTime, todayStart)
                 .le(ORefund::getCreateTime, todayEnd));
-        stats.put("todayCount", todayCount);
+        stats.setTodayCount(todayCount);
 
         List<ORefund> todayRefunds = this.list(new LambdaQueryWrapper<ORefund>()
                 .eq(ORefund::getErpStatus, EnumAfterSaleStatus.COMPLETED.getCode())
@@ -388,35 +388,35 @@ public class ORefundServiceImpl extends ServiceImpl<ORefundMapper, ORefund> impl
         double todayRefundAmount = todayRefunds.stream()
                 .mapToDouble(r -> r.getRefundFee() != null ? r.getRefundFee() : 0f)
                 .sum();
-        stats.put("todayRefundAmount", Math.round(todayRefundAmount * 100) / 100.0);
+        stats.setTodayRefundAmount(Math.round(todayRefundAmount * 100) / 100.0);
 
         long pendingAudit = this.count(new LambdaQueryWrapper<ORefund>()
                 .eq(ORefund::getErpStatus, EnumAfterSaleStatus.PENDING_AUDIT.getCode()));
-        stats.put("pendingAudit", pendingAudit);
+        stats.setPendingAudit(pendingAudit);
 
         long pendingProcess = this.count(new LambdaQueryWrapper<ORefund>()
                 .in(ORefund::getErpStatus,
                         EnumAfterSaleStatus.PENDING_RETURN.getCode(),
                         EnumAfterSaleStatus.PENDING_REFUND.getCode(),
                         EnumAfterSaleStatus.PENDING_EXCHANGE.getCode()));
-        stats.put("pendingProcess", pendingProcess);
+        stats.setPendingProcess(pendingProcess);
 
-        long totalRefundAmount = this.count(new LambdaQueryWrapper<ORefund>()
+        long totalCompleted = this.count(new LambdaQueryWrapper<ORefund>()
                 .eq(ORefund::getErpStatus, EnumAfterSaleStatus.COMPLETED.getCode()));
-        stats.put("totalCompleted", totalRefundAmount);
+        stats.setTotalCompleted(totalCompleted);
 
         return stats;
     }
 
     @Override
-    public Map<String, Object> getAfterSaleConfig() {
-        Map<String, Object> config = new HashMap<>();
-        config.put("returnPeriodDays", getConfigInt("retail.return.period_days", 7));
-        config.put("exchangePeriodDays", getConfigInt("retail.exchange.period_days", 15));
-        config.put("refundAuditThreshold", getConfigDouble("retail.refund.audit_threshold", 200.0));
+    public AfterSaleConfigVo getAfterSaleConfig() {
+        AfterSaleConfigVo config = new AfterSaleConfigVo();
+        config.setReturnPeriodDays(getConfigInt("retail.return.period_days", 7));
+        config.setExchangePeriodDays(getConfigInt("retail.exchange.period_days", 15));
+        config.setRefundAuditThreshold(getConfigDouble("retail.refund.audit_threshold", 200.0));
         String reasons = getConfigString("retail.return.reasons",
                 "商品质量问题,不想要了,商品描述不符,发错货,少件漏发,其他原因");
-        config.put("returnReasons", reasons.split(","));
+        config.setReturnReasons(reasons.split(","));
         return config;
     }
 

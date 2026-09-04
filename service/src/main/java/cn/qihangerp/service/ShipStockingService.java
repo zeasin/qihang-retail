@@ -7,7 +7,7 @@ import cn.qihangerp.model.entity.OOrder;
 import cn.qihangerp.model.request.ShipDeliveryRequest;
 import cn.qihangerp.model.request.ShipStockingSearchRequest;
 
-import java.util.Map;
+import cn.qihangerp.model.vo.ShipStockingStatsVo;
 
 public interface ShipStockingService {
 
@@ -19,5 +19,5 @@ public interface ShipStockingService {
 
     ResultVo<String> executePickup(String orderId, String username);
 
-    Map<String, Object> getStats();
+    ShipStockingStatsVo getStats();
 }

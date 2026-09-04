@@ -11,8 +11,6 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
-
 /**
  * 订单备货/配送 Controller
  */
@@ -55,7 +53,6 @@ public class ShipStockingController extends BaseController {
 
     @GetMapping("/stats")
     public AjaxResult stats() {
-        Map<String, Object> stats = shipStockingService.getStats();
-        return AjaxResult.success(stats);
+        return AjaxResult.success(shipStockingService.getStats());
     }
 }
