@@ -5500,7 +5500,14 @@ CREATE TABLE `o_refund`  (
   `merchant_id` bigint NOT NULL COMMENT '商户id',
   `platform_status` varchar(55) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '平台状态',
   `platform_status_text` varchar(55) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '平台状态文本',
-  `erp_status` int NOT NULL COMMENT 'ERP状态0待处理10已退款21退货中22已退货退款31换货中32换货完成41补发中42补发完成',
+  `erp_status` int NOT NULL COMMENT 'ERP售后状态（简化码）0待审核 1待退货 2待退款 3待换发 10已完成 11已取消 12已拒绝',
+  `audit_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '审核人',
+  `audit_time` datetime NULL DEFAULT NULL COMMENT '审核时间',
+  `audit_remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '审核备注',
+  `refund_method` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '退款方式：cash现金/original原路退回/balance退到余额',
+  `refund_time` datetime NULL DEFAULT NULL COMMENT '退款执行时间',
+  `refund_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '退款执行人',
+  `receive_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '退货收货人',
   `send_logistics_company` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '发货物流公司',
   `send_logistics_code` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '发货物流单号',
   `process_type` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '处理类型',
@@ -6281,18 +6288,6 @@ CREATE TABLE `offline_refund`  (
 -- Table structure for oms_dou_logistics_template
 -- ----------------------------
 DROP TABLE IF EXISTS `oms_dou_logistics_template`;
-CREATE TABLE `oms_dou_logistics_template`  (
-  `id` bigint NOT NULL AUTO_INCREMENT,
-  `logistics_code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `perview_url` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
-  `template_code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
-  `template_id` bigint NULL DEFAULT NULL,
-  `template_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
-  `template_type` int NULL DEFAULT NULL,
-  `template_url` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
-  `version` int NULL DEFAULT NULL,
-  PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 66 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of oms_dou_logistics_template
@@ -6302,17 +6297,6 @@ CREATE TABLE `oms_dou_logistics_template`  (
 -- Table structure for oms_pdd_logistics_template
 -- ----------------------------
 DROP TABLE IF EXISTS `oms_pdd_logistics_template`;
-CREATE TABLE `oms_pdd_logistics_template`  (
-  `id` bigint NOT NULL AUTO_INCREMENT,
-  `type` int NOT NULL COMMENT '类型0标准模版1自定义模版',
-  `wp_code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '物流公司code',
-  `template_code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
-  `template_id` bigint NULL DEFAULT NULL COMMENT '模板id',
-  `template_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
-  `waybill_type` int NULL DEFAULT NULL,
-  `template_url` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
-  PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 193 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of oms_pdd_logistics_template
@@ -6322,16 +6306,6 @@ CREATE TABLE `oms_pdd_logistics_template`  (
 -- Table structure for oms_pdd_message
 -- ----------------------------
 DROP TABLE IF EXISTS `oms_pdd_message`;
-CREATE TABLE `oms_pdd_message`  (
-  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键id',
-  `mall_id` bigint NOT NULL COMMENT '店铺id',
-  `type` varchar(55) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '消息类型',
-  `content` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '消息内容',
-  `status` int NOT NULL DEFAULT 0 COMMENT '处理状态0未处理1已处理',
-  `created_time` bigint NOT NULL COMMENT '创建时间',
-  `updated_time` bigint NOT NULL DEFAULT 0 COMMENT '修改时间',
-  PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of oms_pdd_message
@@ -6341,33 +6315,6 @@ CREATE TABLE `oms_pdd_message`  (
 -- Table structure for oms_platform_logistics_waybill_template
 -- ----------------------------
 DROP TABLE IF EXISTS `oms_platform_logistics_waybill_template`;
-CREATE TABLE `oms_platform_logistics_waybill_template`  (
-  `id` bigint NOT NULL AUTO_INCREMENT,
-  `platform_id` int NOT NULL COMMENT '平台id',
-  `platform_type` varchar(25) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '平台类别',
-  `template_waybill_type` varchar(55) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '物流单打印模板的面单类型:未知-NONE,快递标准面单STANDARD,TRIPLE快递三联面单,PORTABLE_TRIPLE快递便携式三联单,EX_STANDARD快运标准面单,EX_TRIPLE快运三联面单,ONE快递一联单,PORTABLE_ONE快递便携式一联单,CUSTOM_ONE快递定制一联单,EX_SINGLE快运一联单,EX_DOUBLE快运二联单',
-  `logistics_id` varchar(55) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '物流ID',
-  `cp_code` varchar(55) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '打印模板对应物流公司的平台编码',
-  `width` float NULL DEFAULT NULL COMMENT '模板的总宽度，单位mm。',
-  `height` float NULL DEFAULT NULL COMMENT '模板的总高度，单位mm。',
-  `template_source` varchar(25) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '打印模板来源:CAINIAO菜鸟云打印,PINDUODUO拼多多云打印,JOS_YUN京东云打印,DOUYIN抖音云打印,VIP_YUN唯品会云打印,KS_YUN快手云打印,SHUNFENG_YUN顺丰云打印,XHS_YUN小红书云打印,WX_VS_YUN微信视频号云打印,DW_YUN得物云打印,MT_YUN美团云打印',
-  `perview_url` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '打印模板预览图片的URL',
-  `template_code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '标准打印模板编码，和templateId 两者至少有一个',
-  `template_id` bigint NULL DEFAULT NULL COMMENT '标准打印模板ID',
-  `template_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '打印模板的名称',
-  `template_type` int NULL DEFAULT NULL,
-  `template_url` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '打印模板的在线URL',
-  `version` int NULL DEFAULT NULL,
-  `remark` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '备注',
-  `customer_template_url` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '自定义模板URL，templateCustomerType=0时该字段为空，支持的大小是76*30和100*40两种尺寸;isv可根据标记语言规则自己实现自定义区域，新版是小红书自研的标记语言，语法格式是json；旧版使用的菜鸟的标记语言，语法格式是xml',
-  `customer_print_items` varchar(355) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '自定义打印项参数列表，注意格式是List<String>，示例：[\"order\",\"buyerMemo\"]',
-  `template_customer_type` varchar(25) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '自定义类型 0-标准 1-订单号 2-商品名称/规格/数量 3-商品名称/规格/数量 + 买家留言 + 商家备注 4-订单号 + 商品名称/规格/数量 + 买家留言 + 商家备注 10-商家云打印系统自定义',
-  PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 81 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '平台物流电子面单打印模板' ROW_FORMAT = DYNAMIC;
-
--- ----------------------------
--- Records of oms_platform_logistics_waybill_template
--- ----------------------------
 
 -- ----------------------------
 -- Table structure for oms_shop_goods
@@ -6810,43 +6757,6 @@ CREATE TABLE `oms_shop_waybill_account`  (
 -- Table structure for oms_shop_waybill_account_share
 -- ----------------------------
 DROP TABLE IF EXISTS `oms_shop_waybill_account_share`;
-CREATE TABLE `oms_shop_waybill_account_share`  (
-  `id` bigint NOT NULL AUTO_INCREMENT,
-  `shipper_id` bigint NOT NULL COMMENT '发货人ID',
-  `type` int NOT NULL DEFAULT 0 COMMENT '类型0自有1商户共享',
-  `shop_id` bigint NOT NULL COMMENT '店铺id',
-  `shop_type` int NOT NULL COMMENT '店铺类型',
-  `shop_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '店铺名',
-  `seller_shop_id` bigint NULL DEFAULT NULL COMMENT '平台店铺id，全局唯一，一个店铺分配一个shop_id',
-  `delivery_id` varchar(25) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '快递公司编码',
-  `company_type` int NULL DEFAULT NULL COMMENT '快递公司类型1：加盟型 2：直营型',
-  `site_code` varchar(25) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '网点编码',
-  `site_name` varchar(55) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '网点名称',
-  `acct_id` bigint NULL DEFAULT NULL COMMENT '电子面单账号id，每绑定一个网点分配一个acct_id',
-  `acct_type` int NULL DEFAULT NULL COMMENT '面单账号类型0：普通账号 1：共享账号',
-  `status` int NULL DEFAULT NULL COMMENT '面单账号状态',
-  `available` int NULL DEFAULT NULL COMMENT '面单余额',
-  `allocated` int NULL DEFAULT NULL COMMENT '累积已取单',
-  `cancel` int NULL DEFAULT NULL COMMENT '累计已取消',
-  `recycled` int NULL DEFAULT NULL COMMENT '累积已回收',
-  `monthly_card` varchar(25) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '月结账号，company_type 为直营型时有效',
-  `site_info` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL COMMENT '网点信息JSON',
-  `sender_province` varchar(25) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '省名称（一级地址）',
-  `sender_city` varchar(25) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '市名称（二级地址）',
-  `sender_county` varchar(25) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
-  `sender_street` varchar(25) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
-  `sender_address` varchar(55) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '详细地址',
-  `name` varchar(25) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '发货人',
-  `mobile` varchar(25) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '发货手机号',
-  `phone` varchar(25) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '发货固定电话',
-  `is_show` int NULL DEFAULT NULL COMMENT '是否前台显示1显示0不显示',
-  `merchant_id` bigint NOT NULL COMMENT '商户id（0总部）',
-  `template_url` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '打印模版url',
-  `origin_account_id` bigint NOT NULL COMMENT '原始accountId',
-  `shipper_type` int NOT NULL DEFAULT 0 COMMENT '发货人类型（10系统云仓30供应商）',
-  `shipper_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '发货人',
-  PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '店铺电子面单账户信息表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of oms_shop_waybill_account_share
@@ -6856,56 +6766,6 @@ CREATE TABLE `oms_shop_waybill_account_share`  (
 -- Table structure for oms_shop_waybill_branch
 -- ----------------------------
 DROP TABLE IF EXISTS `oms_shop_waybill_branch`;
-CREATE TABLE `oms_shop_waybill_branch`  (
-  `id` int NOT NULL AUTO_INCREMENT COMMENT '自增ID',
-  `key1` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '商家物流网点信息的 唯一key， 商家物流新增/编辑时，只回传该字段即可指定网点',
-  `code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '编码',
-  `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '网点名称',
-  `waybill_platform_type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '淘宝菜鸟-WB_TB,京东无界-WB_JD_ALPHA，仅用于电子面单场景，打印模板相关使用：WB_JD_YUN,京东快递-WB_JD_ETMS，仅用于电子面单场景，打印模板相关使用：WB_JD_YUN,拼多多-WB_PDD,抖音-WB_DY,唯品会-WB_VIP,快手-WB_KS,WB_JD_YUN仅用于打印模板的查询和返回值中。不能用于电子面单,小红书云打印-WB_XHS,微信视频号电子面单云打印-WB_WX_VS,线下普通-WB_OTHER，仅用于线下快递面单,得物云打印-WB_DW,WB_YZ有赞云打印,WB_MT美团云打印',
-  `brand_code` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '网点品牌编号,目前仅顺丰具有',
-  `ref_logistics_code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '平台物流编码',
-  `ref_logistics_id` int NULL DEFAULT NULL COMMENT '平台物流id',
-  `ref_logistics_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '平台物流名称',
-  `ref_logistics_type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '平台物流类型：DIRECT-直营，JOIN-加盟，CONF-落地配，DIRECT_NETSITE-直营带网点',
-  `settle_account` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '结算账户',
-  `source_key` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '源键',
-  `province` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '省份',
-  `city` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '城市',
-  `detail` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '详细地址',
-  `district` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '区县',
-  `num` int NULL DEFAULT 0 COMMENT '电子面单余额数量',
-  `address_address` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '地址（详细）',
-  `city_id` int NOT NULL COMMENT '城市 ID',
-  `city_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '城市名称',
-  `country_id` int NOT NULL COMMENT '区id',
-  `country_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '区名称',
-  `countryside_id` int NOT NULL COMMENT '乡镇 ID',
-  `countryside_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '乡镇名称',
-  `province_id` int NOT NULL COMMENT '省份 ID',
-  `province_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '省份名称',
-  `amount` int NULL DEFAULT 0 COMMENT '金额',
-  `branch_code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '分支编码',
-  `branch_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '分支名称',
-  `operation_type` int NOT NULL COMMENT '操作类型',
-  `provider_code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '提供者编码',
-  `provider_id` bigint NULL DEFAULT NULL COMMENT '提供者ID',
-  `provider_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '提供者名称',
-  `provider_type` int NOT NULL COMMENT '提供者类型',
-  `support_cod` tinyint(1) NULL DEFAULT 0 COMMENT '是否支持货到付款',
-  `town` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '镇',
-  `deliver_name` varchar(25) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '发货人',
-  `deliver_mobile` varchar(25) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '发货手机号',
-  `deliver_phone` varchar(25) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '发货固定电话',
-  `template_url` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '打印模版url',
-  `shop_id` bigint NOT NULL COMMENT '店铺id',
-  `shop_type` int NOT NULL COMMENT '店铺类型',
-  `merchant_id` bigint NOT NULL DEFAULT 0 COMMENT '商户id',
-  `type` varchar(25) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT 'PT' COMMENT '类型：DIANSAN，PT',
-  `outer_logistics_id` varchar(25) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '外部logistics_id（点三使用）',
-  `support_offline` int NULL DEFAULT 0 COMMENT '是否支持线下打单',
-  `template_id` varchar(55) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '模板id',
-  PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '点三电子面单物流网点表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of oms_shop_waybill_branch
@@ -6915,18 +6775,6 @@ CREATE TABLE `oms_shop_waybill_branch`  (
 -- Table structure for oms_wei_logistics_template
 -- ----------------------------
 DROP TABLE IF EXISTS `oms_wei_logistics_template`;
-CREATE TABLE `oms_wei_logistics_template`  (
-  `id` bigint NOT NULL AUTO_INCREMENT,
-  `logistics_code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
-  `desc1` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
-  `width` int NULL DEFAULT NULL,
-  `height` int NULL DEFAULT NULL,
-  `url` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
-  `custom_config` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
-  `is_customize` int NOT NULL DEFAULT 0 COMMENT '是否自定义0否1是',
-  PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of oms_wei_logistics_template
@@ -6936,16 +6784,6 @@ CREATE TABLE `oms_wei_logistics_template`  (
 -- Table structure for oms_wei_message
 -- ----------------------------
 DROP TABLE IF EXISTS `oms_wei_message`;
-CREATE TABLE `oms_wei_message`  (
-  `id` bigint NOT NULL,
-  `order_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
-  `after_sale_order_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
-  `status` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `event` varchar(55) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '事件类型',
-  `create_time` bigint NULL DEFAULT NULL COMMENT '创建时间',
-  `handle_status` int NOT NULL COMMENT '处理状态0未处理1已处理',
-  PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '微信小店消息处理' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of oms_wei_message
@@ -6955,16 +6793,8 @@ CREATE TABLE `oms_wei_message`  (
 -- Table structure for oms_wei_waybill_package_type
 -- ----------------------------
 DROP TABLE IF EXISTS `oms_wei_waybill_package_type`;
-CREATE TABLE `oms_wei_waybill_package_type`  (
-  `id` bigint NOT NULL AUTO_INCREMENT,
-  `shop_id` bigint NULL DEFAULT NULL COMMENT '店铺id',
-  `delivery_id` varchar(25) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '快递公司编码',
-  `value` varchar(55) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '枚举值',
-  `label` varchar(55) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '枚举描述',
-  PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 38 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '视频号小店电子面单取号包裹类型' ROW_FORMAT = DYNAMIC;
-
--- ----------------------------
+--------------------
+--------------------
 -- Records of oms_wei_waybill_package_type
 -- ----------------------------
 
@@ -7002,7 +6832,7 @@ CREATE TABLE `sys_config`  (
   `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
   `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '备注',
   PRIMARY KEY (`config_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '参数配置表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 9 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '参数配置表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_config
@@ -7011,6 +6841,10 @@ INSERT INTO `sys_config` VALUES (1, '系统名称', 'sys.name', '启航零售ERP
 INSERT INTO `sys_config` VALUES (2, 'mms系统名称', 'sys.name.mms', 'MMS商户系统', 'Y', 'admin', NULL, '', NULL, NULL);
 INSERT INTO `sys_config` VALUES (3, 'vms系统名称', 'sys.name.vms', 'VMS供应商系统', 'Y', 'admin', NULL, '', NULL, NULL);
 INSERT INTO `sys_config` VALUES (4, '账号自助-验证码开关', 'sys.account.captchaEnabled', 'false', 'Y', 'admin', '2023-08-07 19:31:38', '', NULL, '是否开启验证码功能（true开启，false关闭）');
+INSERT INTO `sys_config` VALUES (5, '退货退款期限(天)', 'retail.return.period_days', '7', 'Y', 'admin', '2026-09-04 10:00:00', '', NULL, '退货退款授权期，订单完成超过此天数不可发起退货退款');
+INSERT INTO `sys_config` VALUES (6, '换货期限(天)', 'retail.exchange.period_days', '15', 'Y', 'admin', '2026-09-04 10:00:00', '', NULL, '换货授权期，订单完成超过此天数不可发起换货');
+INSERT INTO `sys_config` VALUES (7, '退款审核阈值(元)', 'retail.refund.audit_threshold', '200', 'Y', 'admin', '2026-09-04 10:00:00', '', NULL, '退款金额超过此值需店长审核，0表示全部需审核');
+INSERT INTO `sys_config` VALUES (8, '退货原因列表', 'retail.return.reasons', '商品质量问题,不想要了,商品描述不符,发错货,少件漏发,其他原因', 'Y', 'admin', '2026-09-04 10:00:00', '', NULL, '退货原因选项，逗号分隔');
 
 -- ----------------------------
 -- Table structure for sys_dept
