@@ -44,8 +44,8 @@
           <el-tag :type="(scope.row.quantity||0)>0?'success':'danger'" size="small">{{ scope.row.quantity??0 }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="锁定库存" align="center" prop="lockedQuantity" width="70" />
-      <el-table-column label="可用库存" align="center" prop="availableQuantity" width="70" />
+      <el-table-column label="锁定库存" align="center" prop="lockedQuantity" width="90" />
+      <el-table-column label="可用库存" align="center" prop="availableQuantity" width="90" />
       <el-table-column label="仓库" align="center" prop="warehouseName" width="150">
         <template #default="scope">
           <el-tag size="small" :type="scope.row.warehouseType==='LOCAL'?'':(scope.row.warehouseType==='CLOUD'?'warning':'info')">

@@ -88,6 +88,9 @@ public class OGoodsInventoryServiceImpl
     public boolean lockStock(Long inventoryId, Integer quantity) {
         OGoodsInventory inv = this.getById(inventoryId);
         if (inv == null) return false;
+        // 锁定库存时校验可用库存是否充足
+        if (quantity > 0 && inv.getAvailableQuantity() < quantity) return false;
+        // 解锁时校验锁定库存是否足够
         if (quantity < 0 && inv.getLockedQuantity() < -quantity) return false;
 
         OGoodsInventory update = new OGoodsInventory();

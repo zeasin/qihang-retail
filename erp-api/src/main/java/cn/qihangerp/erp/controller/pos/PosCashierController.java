@@ -39,6 +39,21 @@ public class PosCashierController extends BaseController {
         String username = getUsername();
         LocalDateTime now = LocalDateTime.now();
 
+        // 下单前校验：可用库存必须大于等于下单数量
+        for (PosOrderItemRequest item : request.getItems()) {
+            if (item.getSkuId() == null || item.getQuantity() == null || item.getQuantity() <= 0) {
+                return AjaxResult.error("商品规格或数量不合法");
+            }
+            OGoodsInventory inv = goodsInventoryService.getOne(
+                new LambdaQueryWrapper<OGoodsInventory>().eq(OGoodsInventory::getSkuId, item.getSkuId()));
+            if (inv == null) {
+                return AjaxResult.error("SKU[" + item.getSkuId() + "]库存记录不存在");
+            }
+            if (inv.getAvailableQuantity() < item.getQuantity()) {
+                return AjaxResult.error("商品[" + item.getName() + "]可用库存不足（剩余" + inv.getAvailableQuantity() + "）");
+            }
+        }
+
         OOrder order = new OOrder();
         order.setOrderNum(request.getOrderNo());
         order.setOrderSource("POS");
@@ -84,7 +99,10 @@ public class PosCashierController extends BaseController {
             orderItem.setCreateTime(now);
             orderService.insertOrderItem(orderItem);
 
-            lockInventory(item.getSkuId(), item.getQuantity());
+            // 锁定库存，校验锁定数量与下单数量是否匹配
+            if (!lockInventory(item.getSkuId(), item.getQuantity())) {
+                throw new RuntimeException("SKU[" + item.getSkuId() + "]库存不足，锁定失败");
+            }
         }
 
         return AjaxResult.success(order.getId());
@@ -185,11 +203,12 @@ public class PosCashierController extends BaseController {
         return AjaxResult.success(stockOut.getId());
     }
 
-    private void lockInventory(Long skuId, int quantity) {
-        if (skuId == null || quantity <= 0) return;
+    private boolean lockInventory(Long skuId, int quantity) {
+        if (skuId == null || quantity <= 0) return false;
         OGoodsInventory inv = goodsInventoryService.getOne(
             new LambdaQueryWrapper<OGoodsInventory>().eq(OGoodsInventory::getSkuId, skuId));
-        if (inv != null) goodsInventoryService.lockStock(inv.getId(), quantity);
+        if (inv == null) return false;
+        return goodsInventoryService.lockStock(inv.getId(), quantity);
     }
 
     private void unlockInventory(Long skuId, int quantity) {
