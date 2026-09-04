@@ -72,6 +72,7 @@ public class ErpStockOutServiceImpl extends ServiceImpl<ErpStockOutMapper, ErpSt
     public ResultVo<Long> createEntry(Long userId, String userName, StockOutCreateRequest request) {
         if(request.getType() == null ) return ResultVo.error(ResultVoEnum.ParamsError,"缺少参数type");
         if(request.getItemList().isEmpty()) return ResultVo.error(ResultVoEnum.ParamsError,"缺少参数itemList");
+        if(request.getItemList().stream().anyMatch(x -> x.getGoodsId() == null)) return ResultVo.error(ResultVoEnum.ParamsError,"商品信息不完整(goodsId不能为空)");
         ErpWarehouse erpWarehouse = erpWarehouseService.getById(request.getWarehouseId());
         if(erpWarehouse==null) return ResultVo.error("仓库信息不存在");
         if(StringUtils.isBlank(request.getOutNum())){
@@ -81,8 +82,10 @@ public class ErpStockOutServiceImpl extends ServiceImpl<ErpStockOutMapper, ErpSt
             request.setOperator(userName);
         }
 
-        Map<Long, List<GoodsSkuInventoryVo>> goodsGroup = request.getItemList().stream().collect(Collectors.groupingBy(x -> x.getGoodsId()));
-        Long total = request.getItemList().stream().mapToLong(GoodsSkuInventoryVo::getQuantity).sum();
+        Map<Long, List<GoodsSkuInventoryVo>> goodsGroup = request.getItemList().stream()
+                .filter(x -> x.getGoodsId() != null)
+                .collect(Collectors.groupingBy(x -> x.getGoodsId()));
+        Long total = request.getItemList().stream().mapToLong(x -> x.getQuantity() != null ? x.getQuantity() : 0).sum();
 
         //添加主表信息
         ErpStockOut stockOut = new ErpStockOut();

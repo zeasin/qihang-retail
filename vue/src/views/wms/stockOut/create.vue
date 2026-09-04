@@ -150,6 +150,7 @@ function skuChange(row: any, val: any) {
   const spec = skuList.value.find((x: any) => x.skuId === val)
   if (spec) {
     row.quantity = 1
+    row.goodsId = spec.goodsId
     row.skuId = spec.skuId
     row.goodsName = spec.goodsName
     row.skuName = spec.skuName
