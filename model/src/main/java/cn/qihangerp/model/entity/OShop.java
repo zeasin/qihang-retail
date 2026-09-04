@@ -1,6 +1,7 @@
 package cn.qihangerp.model.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
@@ -27,11 +28,6 @@ public class OShop {
      * 店铺类型（对应第三方平台Id，999=线下门店）
      */
     private Integer type;
-
-    /**
-     * 门店编码
-     */
-    private String number;
 
     /**
      * 店铺url
@@ -166,25 +162,30 @@ public class OShop {
     /**
      * 门店编码（POS扩展）
      */
+    @TableField(exist = false)
     private String storeNumber;
 
     /**
      * 营业时间
      */
+    @TableField(exist = false)
     private String openingHours;
 
     /**
      * 收银台数量
      */
+    @TableField(exist = false)
     private Integer registerCount;
 
     /**
      * 打印机配置
      */
+    @TableField(exist = false)
     private String printConfig;
 
     /**
      * 支付参数
      */
+    @TableField(exist = false)
     private String payConfig;
 }

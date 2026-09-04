@@ -74,6 +74,7 @@ const viewsMap: Record<string, () => Promise<any>> = {
   'shipping/stocking': () => import('@/views/shipping/stocking/index.vue'),
   'shipping/ewaybillPrint/index': () => import('@/views/shipping/ewaybillPrint/index.vue'),
   'shop/platform/index': () => import('@/views/shop/platform/index.vue'),
+  'shop/index': () => import('@/views/shop/index.vue'),
 }
 
 function loadView(view: string) {
