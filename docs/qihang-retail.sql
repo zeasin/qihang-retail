@@ -5912,6 +5912,10 @@ INSERT INTO `o_shop_platform` VALUES (500, '微信小店', 'WEISHOP', '', NULL, 
 INSERT INTO `o_shop_platform` VALUES (600, '快手', 'KUAISHOU', '', '', 'https://erp.qihangerp.cn/prod-api/api/oms-api/ks/oauth_callback', '75863d0e2e011e0598e5275d130ace19', 0, 60, 1);
 INSERT INTO `o_shop_platform` VALUES (700, '小红书', 'XHS', '', '', 'https://erp.qihangerp.cn/prod-api/api/oms-api/xhs/oauth_callback', 'https://ark.xiaohongshu.com/ark/open_api/v3/common_controller', 0, 70, 1);
 INSERT INTO `o_shop_platform` VALUES (999, '线下门店', 'OFFLINE', ' ', NULL, '', NULL, 0, 99, 1);
+INSERT INTO `o_shop_platform` VALUES (1100, '美团闪购', 'MT_FLASH', '', '', '', 'https://openapi-waimai.meituan.com', 0, 110, 1);
+INSERT INTO `o_shop_platform` VALUES (1200, '淘宝闪购', 'TAO_FLASH', '', '', '', 'https://eco.taobao.com/router/rest', 0, 120, 1);
+INSERT INTO `o_shop_platform` VALUES (1300, '京东到家', 'JD_DJ', '', '', '', 'https://api.jd.com/routerjson', 0, 130, 1);
+INSERT INTO `o_shop_platform` VALUES (1400, '抖音小时达', 'DY_HOUR', '', '', '', 'https://openapi-fxg.jinritemai.com/', 0, 140, 1);
 
 -- ----------------------------
 -- Table structure for o_shop_pull_lasttime
