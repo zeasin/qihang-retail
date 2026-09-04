@@ -73,8 +73,6 @@ import { encrypt, decrypt } from '@/utils/jsencrypt'
 import type { FormInstance, FormRules } from 'element-plus'
 import { useUserStore } from '@/store/modules/user'
 import { getCodeImg } from '@/api/login'
-import { User, Lock, Key } from '@element-plus/icons-vue'
-import { getConfig } from '@/api/system/config'
 
 const router = useRouter()
 const route = useRoute()
@@ -148,10 +146,6 @@ async function handleLogin() {
 onMounted(async () => {
   redirect.value = route.query.redirect as string | undefined
   loading.value = true
-  try {
-    const resp = await getConfig('sys.name')
-    if (resp.data) title.value = resp.data.configValue
-  } catch { /* ignore */ }
   await getCode()
   getCookie()
 })

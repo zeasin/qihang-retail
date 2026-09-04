@@ -7007,7 +7007,7 @@ CREATE TABLE `sys_config`  (
 -- ----------------------------
 -- Records of sys_config
 -- ----------------------------
-INSERT INTO `sys_config` VALUES (1, '系统名称', 'sys.name', '启航电商ERP', 'Y', 'admin', '2023-08-07 19:31:38', '', NULL, '蓝色 skin-blue、绿色 skin-green、紫色 skin-purple、红色 skin-red、黄色 skin-yellow');
+INSERT INTO `sys_config` VALUES (1, '系统名称', 'sys.name', '启航零售ERP', 'Y', 'admin', '2023-08-07 19:31:38', '', NULL, '蓝色 skin-blue、绿色 skin-green、紫色 skin-purple、红色 skin-red、黄色 skin-yellow');
 INSERT INTO `sys_config` VALUES (2, 'mms系统名称', 'sys.name.mms', 'MMS商户系统', 'Y', 'admin', NULL, '', NULL, NULL);
 INSERT INTO `sys_config` VALUES (3, 'vms系统名称', 'sys.name.vms', 'VMS供应商系统', 'Y', 'admin', NULL, '', NULL, NULL);
 INSERT INTO `sys_config` VALUES (4, '账号自助-验证码开关', 'sys.account.captchaEnabled', 'false', 'Y', 'admin', '2023-08-07 19:31:38', '', NULL, '是否开启验证码功能（true开启，false关闭）');
