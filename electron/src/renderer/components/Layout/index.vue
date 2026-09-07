@@ -254,6 +254,7 @@ const handleCommand = (command: string) => {
 
 .content {
   flex: 1;
+  min-height: 0;
   overflow: auto;
   background-color: #f5f7fa;
 }

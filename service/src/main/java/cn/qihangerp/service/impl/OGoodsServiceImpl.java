@@ -16,6 +16,7 @@ import cn.qihangerp.common.PageQuery;
 import cn.qihangerp.common.PageResult;
 import cn.qihangerp.common.ResultVo;
 import cn.qihangerp.model.entity.OGoods;
+import cn.qihangerp.model.entity.OGoodsInventory;
 import cn.qihangerp.model.entity.OGoodsSku;
 import cn.qihangerp.model.entity.OGoodsSkuAttr;
 import cn.qihangerp.model.bo.GoodsAddBo;
@@ -31,6 +32,8 @@ import org.springframework.util.StringUtils;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
 * @author TW
@@ -154,8 +157,36 @@ public class OGoodsServiceImpl extends ServiceImpl<OGoodsMapper, OGoods>
         queryWrapper.like(StringUtils.hasText(bo.getName()),OGoods::getName,bo.getName());
         Page<OGoods> pages = goodsMapper.selectPage(pageQuery.build(), queryWrapper);
         if(pages.getRecords()!=null){
+            // 1. 加载所有SKU
             for(OGoods g:pages.getRecords()){
                 g.setSkuList(skuMapper.selectList(new LambdaQueryWrapper<OGoodsSku>().eq(OGoodsSku::getGoodsId,g.getId())));
+            }
+            // 2. 收集所有SKU ID，批量查询库存
+            List<String> allSkuIds = pages.getRecords().stream()
+                .filter(g -> g.getSkuList() != null)
+                .flatMap(g -> g.getSkuList().stream())
+                .map(OGoodsSku::getId)
+                .filter(StringUtils::hasText)
+                .toList();
+            if (!allSkuIds.isEmpty()) {
+                List<Long> longSkuIds = allSkuIds.stream().map(Long::parseLong).toList();
+                List<OGoodsInventory> invList = inventoryMapper.selectList(
+                    new LambdaQueryWrapper<OGoodsInventory>()
+                        .in(OGoodsInventory::getSkuId, longSkuIds));
+                Map<Long, OGoodsInventory> invMap = invList.stream()
+                    .collect(Collectors.toMap(OGoodsInventory::getSkuId, v -> v, (a, b) -> a));
+                // 3. 塞进每个SKU的inventory字段，availableQuantity不小于0
+                for (OGoods g : pages.getRecords()) {
+                    if (g.getSkuList() == null) continue;
+                    for (OGoodsSku sku : g.getSkuList()) {
+                        OGoodsInventory inv = invMap.get(Long.parseLong(sku.getId()));
+                        if (inv != null) {
+                            int avail = inv.getAvailableQuantity() == null ? 0 : Math.max(0, inv.getAvailableQuantity());
+                            inv.setAvailableQuantity(avail);
+                            sku.setInventory(inv);
+                        }
+                    }
+                }
             }
         }
         return PageResult.build(pages);

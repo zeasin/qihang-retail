@@ -200,5 +200,7 @@ public class OGoodsSku implements Serializable {
     @TableField(exist=false)
     private Integer isGift=0;
     @TableField(exist = false)
+    private OGoodsInventory inventory;
+    @TableField(exist = false)
     private static final long serialVersionUID = 1L;
 }

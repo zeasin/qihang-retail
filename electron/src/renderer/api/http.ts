@@ -25,6 +25,12 @@ instance.interceptors.request.use(
 instance.interceptors.response.use(
   (response) => {
     const res = response.data
+    if (res.code === 401) {
+      localStorage.removeItem('token')
+      router.push('/login')
+      ElMessage.error(res.msg || '登录已过期，请重新登录')
+      return Promise.reject(new Error(res.msg))
+    }
     if (res.code !== 200) {
       ElMessage.error(res.msg || '请求失败')
       return Promise.reject(new Error(res.msg))
