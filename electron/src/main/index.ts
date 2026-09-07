@@ -1,4 +1,4 @@
-import { app, BrowserWindow, Menu, shell } from 'electron'
+import { app, BrowserWindow, Menu, shell, nativeImage } from 'electron'
 import { join } from 'path'
 import { registerIPCHandlers } from './ipc/handlers'
 
@@ -7,18 +7,22 @@ let mainWindow: BrowserWindow | null = null
 // 开发模式判断（vite-plugin-electron 注入 dev server 地址）
 const isDev = process.env.VITE_DEV_SERVER_URL
 
-function getWindowIcon(): string {
-  return join(__dirname, '../../resources/icon.png')
+function getWindowIcon(): nativeImage {
+  if (process.platform === 'win32') {
+    return nativeImage.createFromPath(join(__dirname, '../../build/icon.ico'))
+  }
+  return nativeImage.createFromPath(join(__dirname, '../../resources/icon.png'))
 }
 
 function createWindow(): void {
+  const icon = getWindowIcon()
   mainWindow = new BrowserWindow({
     width: 1400,
     height: 900,
     minWidth: 1200,
     minHeight: 700,
     title: '启航零售ERP',
-    icon: getWindowIcon(),
+    icon,
     autoHideMenuBar: true,
     backgroundColor: '#f5f7fa',
     show: false,
