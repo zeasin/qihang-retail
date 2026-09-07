@@ -7,6 +7,7 @@
   "main": "dist-electron/main/index.js",
   "scripts": {
     "dev": "vite",
+    "dev:fix-icon": "node -e \"require('rcedit')('node_modules/electron/dist/electron.exe',{icon:'build/icon.ico'}).then(()=>console.log('done'))\"",
     "build": "vue-tsc --noEmit && vite build && tsc -p tsconfig.main.json",
     "build:win": "npm run build && electron-builder --win",
     "build:mac": "npm run build && electron-builder --mac",
@@ -26,6 +27,7 @@
     "@vitejs/plugin-vue": "^5.1.0",
     "electron": "^32.0.0",
     "electron-builder": "^25.0.0",
+    "rcedit": "^4.0.0",
     "sass": "^1.77.0",
     "typescript": "^5.5.0",
     "vite": "^5.4.0",

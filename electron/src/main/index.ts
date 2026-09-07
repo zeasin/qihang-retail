@@ -60,6 +60,11 @@ registerIPCHandlers()
 
 // 应用准备就绪
 app.whenReady().then(() => {
+  // 设置应用用户模型ID（Windows 任务栏图标分组必需）
+  if (process.platform === 'win32') {
+    app.setAppUserModelId('com.qihang.retail')
+  }
+
   // Windows/Linux 去掉默认菜单栏
   if (process.platform !== 'darwin') {
     Menu.setApplicationMenu(null)
