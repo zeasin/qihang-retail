@@ -1051,23 +1051,22 @@ RedisConnectionFailureException: Unable to connect to Redis
 
 启航开源项目矩阵：
 
-| 项目               | 定位                 | 官网 | Gitee | GitHub                                              |
-|:-------------------|:---------------------|:-----|:------|:----------------------------------------------------|
-| **启航零售ERP ⬅** | **线下零售管理平台** | [官网](https://qihangerp.cn/open/retail-erp.html) | [Gitee](https://gitee.com/qiliping/qihang-retail) | [GitHub](https://github.com/zeasin/qihang-retail)   |
-| 启航电商ERP        | 电商业务 AI 底座     | [官网](https://qihangerp.cn/open/erp.html) | [Gitee](https://gitee.com/qiliping/qihang-erp-open) | [GitHub](https://github.com/zeasin/qihang-erp-open) |
-| OMS 订单中台       | 轻量级订单管理       | [官网](https://qihangerp.cn/open/oms.html) | [Gitee](https://gitee.com/qiliping/qihang-oms) | [GitHub](https://github.com/zeasin/qihang-oms)      |
-| 启航跨境电商ERP    | 跨境电商专用版       | [官网](https://qihangerp.cn/open/cross-border.html) | [Gitee](https://gitee.com/qiliping/qihang-cb-erp) | [GitHub](https://github.com/zeasin/qihang-cb-erp)                                          |
+| 项目               | 定位                 | 官网                                                                | Gitee | GitHub                                              |
+|:-------------------|:---------------------|:--------------------------------------------------------------------|:------|:----------------------------------------------------|
+| **启航零售ERP ⬅** | **线下零售管理平台** | [官网](https://qihangerp.cn/open/retail-erp.html?utm_source=retail) | [Gitee](https://gitee.com/qiliping/qihang-retail) | [GitHub](https://github.com/zeasin/qihang-retail)   |
+| 启航电商ERP        | 电商业务 AI 底座     | [官网](https://qihangerp.cn/open/erp.html?utm_source=retail)                          | [Gitee](https://gitee.com/qiliping/qihang-erp-open) | [GitHub](https://github.com/zeasin/qihang-erp-open) |
+| OMS 订单中台       | 轻量级订单管理       | [官网](https://qihangerp.cn/open/oms.html?utm_source=retail)                          | [Gitee](https://gitee.com/qiliping/qihang-oms) | [GitHub](https://github.com/zeasin/qihang-oms)      |
+| 启航跨境电商ERP    | 跨境电商专用版       | [官网](https://qihangerp.cn/open/cross-border.html?utm_source=retail)                 | [Gitee](https://gitee.com/qiliping/qihang-cb-erp) | [GitHub](https://github.com/zeasin/qihang-cb-erp)                                          |
 
 ---
 
-## 企业版
+## 🔗 相关链接
 
-如需多商户架构、专业技术支持、功能定制、私有化部署等，请联系：
-
-| 方式 | 信息 |
-|------|------|
-| 企业版 | https://qihangerp.cn |
-
+| 链接            | 地址                                                                 |
+|-----------------|----------------------------------------------------------------------|
+| 🌐 官网         | [https://qihangerp.cn/](https://qihangerp.cn/?utm_source=retail)                       |
+| 💬 开源社区交流              | [https://qihangerp.cn/open/](https://qihangerp.cn/open/?utm_source=retail)             |
+| 💼 企业版       | [https://qihangerp.cn/enterprise/](https://qihangerp.cn/enterprise/?utm_source=retail) |
 ---
 
 > 💖 启航零售ERP 持续开源迭代中。如果项目对您有帮助，请点个 **Star ⭐** 给予鼓励！
