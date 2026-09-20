@@ -48,6 +48,16 @@ async function waitServer(timeoutMs = 60000) {
 // 1. 先构建一份主进程产物（watch 交给 npm script 另起）
 await import(pathToFileURL(path.join(root, 'scripts', 'build-electron.mjs')).href)
 
+// 1.5 开发态宿主进程是 electron.exe，不修补图标任务栏/标题栏就是默认蓝原子图标
+//     （打包态图标由 electron-builder 在构建期写进 exe，与此无关）
+try {
+  const rcedit = require('rcedit')
+  await rcedit(require('electron'), { icon: path.join(root, 'build', 'icon.ico') })
+  console.log('[electron:dev] electron.exe 图标已修补')
+} catch (e) {
+  console.warn('[electron:dev] 跳过图标修补：', e.message.split('\n')[0], '（electron.exe 正在运行时先关闭，或手动 npm run electron:fix-icon）')
+}
+
 // 2. 等 devServer
 console.log(`[electron:dev] 探测 devServer ${DEV_URL} …`)
 if (!(await waitServer())) {

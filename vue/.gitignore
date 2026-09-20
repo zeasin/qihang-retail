@@ -26,3 +26,4 @@ dist-ssr
 # Electron 产物
 dist-electron
 release
+release/

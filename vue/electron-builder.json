@@ -8,7 +8,8 @@
   "files": [
     "dist/**/*",
     "dist-electron/**/*",
-    "resources/**/*"
+    "resources/**/*",
+    "build/icon.ico"
   ],
   "asarUnpack": [
     "node_modules/serialport/**",
