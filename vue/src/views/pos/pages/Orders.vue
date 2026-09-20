@@ -58,9 +58,19 @@
           <el-tag :type="getStatusType(row.orderStatus)">{{ getStatusName(row.orderStatus) }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="操作" width="150" fixed="right">
+      <el-table-column label="操作" width="210" fixed="right">
         <template #default="{ row }">
           <el-button type="primary" link size="small" @click="viewDetail(row)">查看</el-button>
+          <el-button
+            v-if="desktop"
+            type="success"
+            link
+            size="small"
+            :loading="printingId === row.id"
+            @click="handleReprint(row)"
+          >
+            打印小票
+          </el-button>
           <el-button
             v-if="canRefund(row)"
             type="warning"
@@ -113,6 +123,12 @@
           </el-table-column>
         </el-table>
       </div>
+      <template #footer v-if="desktop">
+        <el-button @click="showDetailDialog = false">关闭</el-button>
+        <el-button type="primary" :loading="printingId === currentOrder?.id" @click="printCurrentDetail">
+          打印小票
+        </el-button>
+      </template>
     </el-dialog>
 
     <el-dialog v-model="showRefundDialog" title="退款" width="400px">
@@ -144,6 +160,9 @@ import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Refresh } from '@element-plus/icons-vue'
 import { getOrderList, getOrder, refundOrder } from '@/api/pos/pos'
+import { hardwareAPI, isElectron } from '@/api/hardware'
+
+const desktop = isElectron()
 
 const loading = ref(false)
 const orderList = ref<any[]>([])
@@ -221,6 +240,70 @@ async function viewDetail(row: any) {
 function canRefund(row: any) {
   // 1待发货 / 2已发货 / 3已完成 可退款
   return row.orderStatus === 1 || row.orderStatus === 2 || row.orderStatus === 3
+}
+
+// ---- 桌面端补打小票 ----
+const printingId = ref<string | number | null>(null)
+
+/** 订单详情 → 小票数据（金额单位：元） */
+function buildReceiptFromOrder(order: any): ReceiptData {
+  const items = (order.itemList || []).map((i: any) => ({
+    goodsName: i.goodsTitle,
+    skuName: i.goodsSpec,
+    barcode: i.barcode,
+    unitPrice: i.goodsPrice,
+    quantity: i.quantity,
+    subtotal: i.itemAmount ?? (i.goodsPrice || 0) * (i.quantity || 0),
+  }))
+  const total = order.goodsAmount ?? items.reduce((s: number, i: any) => s + (i.subtotal || 0), 0)
+  const final = order.payment ?? order.amount ?? total
+  return {
+    title: '收银小票',
+    orderNo: order.orderNum || String(order.id),
+    time: String(order.orderTime || order.createTime || '').replace('T', ' ').slice(0, 19),
+    memberName: order.receiverName,
+    salespersonName: order.salesmanName || order.createBy,
+    items,
+    totalAmount: total,
+    discountAmount: Math.max(0, (total || 0) - (final || 0)),
+    finalAmount: final,
+    payMethod: order.payType,
+  }
+}
+
+async function printOrderReceipt(order: any) {
+  const r = await hardwareAPI.printReceipt(buildReceiptFromOrder(order))
+  if (r.ok) {
+    ElMessage.success('小票已发送到打印机')
+  } else {
+    ElMessage.warning(`打印失败：${r.reason || '未知原因'}${r.hint ? '（' + r.hint + '）' : ''}`)
+  }
+}
+
+/** 列表行补打：先取详情（含商品明细）再打印 */
+async function handleReprint(row: any) {
+  if (printingId.value) return
+  printingId.value = row.id
+  try {
+    const res: any = await getOrder(row.id)
+    await printOrderReceipt(res.data || row)
+  } catch (e) {
+    console.error(e)
+    ElMessage.error('获取订单详情失败，无法打印')
+  } finally {
+    printingId.value = null
+  }
+}
+
+/** 详情弹窗内补打 */
+async function printCurrentDetail() {
+  if (!currentOrder.value || printingId.value) return
+  printingId.value = currentOrder.value.id
+  try {
+    await printOrderReceipt(currentOrder.value)
+  } finally {
+    printingId.value = null
+  }
 }
 
 function handleRefund(row: any) {

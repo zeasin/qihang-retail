@@ -73,6 +73,7 @@ import { encrypt, decrypt } from '@/utils/jsencrypt'
 import type { FormInstance, FormRules } from 'element-plus'
 import { useUserStore } from '@/store/modules/user'
 import { getCodeImg } from '@/api/login'
+import { defaultLandingPath } from '@/utils/desktop'
 
 const router = useRouter()
 const route = useRoute()
@@ -135,7 +136,10 @@ async function handleLogin() {
 
   try {
     await userStore.Login({ ...loginForm })
-    router.push(redirect.value || '/')
+    // redirect 为空或指向首页（应用启动被守卫带上来的）时，按运行环境落地：桌面端→收银台
+    const r = redirect.value
+    const target = !r || r === '/' || r === '/index' ? defaultLandingPath() : r
+    router.push(target)
   } catch {
     if (captchaEnabled.value) getCode()
   } finally {

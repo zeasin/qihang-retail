@@ -65,8 +65,10 @@ const pool = new Map<string, any>()
  * 打开（或复用）一个串口连接
  * @param portPath 如 COM1
  * @param baudRate 如 9600
+ * @param timeoutMs 打开超时：端口被占用/虚拟端口/设备未就绪时 open 回调可能永不触发，
+ *                  超时后 reject；若之后真的打开了，仍放回连接池供后续复用。
  */
-export function open(portPath: string, baudRate = 9600): Promise<any> {
+export function open(portPath: string, baudRate = 9600, timeoutMs = 5000): Promise<any> {
   const sp = getSerialport()
   if (!sp) return Promise.reject(new Error(unavailableReason() || 'serialport 不可用'))
   if (!portPath) return Promise.reject(new Error('未配置串口'))
@@ -76,21 +78,44 @@ export function open(portPath: string, baudRate = 9600): Promise<any> {
   if (exist && exist.isOpen) return Promise.resolve(exist)
 
   return new Promise((resolve, reject) => {
+    let settled = false
+    const timer = setTimeout(() => {
+      if (settled) return
+      settled = true
+      reject(new Error(`打开串口 ${portPath} 超时（${Math.round(timeoutMs / 1000)}s），端口可能被占用或设备未就绪`))
+    }, timeoutMs)
     const port = new sp.SerialPort({ path: portPath, baudRate, autoOpen: false })
     port.open((err: Error | null | undefined) => {
-      if (err) return reject(new Error(`打开串口 ${portPath} 失败：${err.message}`))
+      if (err) {
+        if (!settled) {
+          settled = true
+          clearTimeout(timer)
+          reject(new Error(`打开串口 ${portPath} 失败：${err.message}`))
+        }
+        return
+      }
       pool.set(key, port)
       // 串口被拔出时清掉缓存，下次调用会重新打开
       port.on('close', () => pool.delete(key))
       port.on('error', (e: Error) => console.error(`[serial] ${portPath} 异常：`, e.message))
-      resolve(port)
+      if (!settled) {
+        settled = true
+        clearTimeout(timer)
+        resolve(port)
+      }
+      // 超时后才打开成功的：已入池，调用方可直接复用
     })
   })
 }
 
-/** 向串口写数据，写完 + drain 后 resolve */
-export function write(portPath: string, baudRate = 9600, buffer: Buffer): Promise<{ path: string; bytes: number }> {
-  return open(portPath, baudRate).then(
+/** 向串口写数据，写完 + drain 后 resolve（整体带超时，防止 drain 回调不触发挂死） */
+export function write(
+  portPath: string,
+  baudRate = 9600,
+  buffer: Buffer,
+  timeoutMs = 8000
+): Promise<{ path: string; bytes: number }> {
+  const task = open(portPath, baudRate).then(
     (port) =>
       new Promise<{ path: string; bytes: number }>((resolve, reject) => {
         port.write(buffer, (err: Error | null | undefined) => {
@@ -102,6 +127,12 @@ export function write(portPath: string, baudRate = 9600, buffer: Buffer): Promis
         })
       })
   )
+  return Promise.race([
+    task,
+    new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error(`串口 ${portPath} 写入超时（${Math.round(timeoutMs / 1000)}s），设备可能未就绪`)), timeoutMs)
+    )
+  ])
 }
 
 /** 关闭全部连接（退出应用时调用） */

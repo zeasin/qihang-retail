@@ -47,14 +47,20 @@ class HardwareManager {
     return this
   }
 
+  /** 单个探测兜底超时：任何设备卡住都不能拖死保存/自检流程 */
+  private static async withTimeout<T>(p: Promise<T>, ms = 8000): Promise<T | null> {
+    return Promise.race([p.catch(() => null), new Promise<null>((r) => setTimeout(() => r(null), ms))])
+  }
+
   /** 开机自检：并发探测所有设备，任何一台失败都不影响启动 */
   async probeAll(): Promise<HardwareStatus> {
     if (!this.printer) return this.status()
+    const t = HardwareManager.withTimeout
     await Promise.all([
-      this.printer.probe().catch(() => {}),
-      this.cashDrawer!.probe().catch(() => {}),
-      this.customerDisplay!.probe().catch(() => {}),
-      this.scale!.probe().catch(() => {})
+      t(this.printer.probe()),
+      t(this.cashDrawer!.probe()),
+      t(this.customerDisplay!.probe()),
+      t(this.scale!.probe())
     ])
     return this.status()
   }

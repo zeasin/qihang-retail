@@ -16,9 +16,16 @@ const notDesktop = <T,>(): Promise<IpcResult<T>> =>
 
 const api = () => window.electronAPI
 
+/**
+ * IPC 走结构化克隆，Vue 的响应式 Proxy 对象会报 "An object could not be cloned"。
+ * 所有要过 IPC 的入参先 JSON 深拷贝一份，剥离 Proxy / 不可克隆值。
+ */
+const plain = <T,>(v: T): T => JSON.parse(JSON.stringify(v)) as T
+
 export const hardwareAPI = {
   // ---- 打印机 ----
-  printReceipt: (data: ReceiptData): Promise<IpcResult> => api()?.printReceipt(data) ?? notDesktop(),
+  printReceipt: (data: ReceiptData): Promise<IpcResult> =>
+    api()?.printReceipt(plain(data)) ?? notDesktop(),
   printTest: (): Promise<IpcResult> => api()?.printTest() ?? notDesktop(),
   listPrinters: (): Promise<IpcResult<PrinterListItem[]>> => api()?.listPrinters() ?? notDesktop(),
 
@@ -40,7 +47,7 @@ export const hardwareAPI = {
   getConfig: (): Promise<IpcResult<AppConfig>> => api()?.getConfig() ?? notDesktop(),
   getConfigPath: (): Promise<IpcResult<string>> => api()?.getConfigPath() ?? notDesktop(),
   setConfig: (patch: Record<string, any>): Promise<IpcResult<AppConfig>> =>
-    api()?.setConfig(patch) ?? notDesktop(),
+    api()?.setConfig(plain(patch)) ?? notDesktop(),
   openConfigFile: (): Promise<IpcResult> => api()?.openConfigFile() ?? notDesktop(),
   relaunch: (): Promise<IpcResult> => api()?.relaunch() ?? notDesktop(),
 

@@ -2,6 +2,11 @@
   <div class="pos-header">
     <div class="header-left">
       <span class="page-title">{{ currentTitle }}</span>
+      <el-tooltip content="硬件设置" placement="bottom" v-if="desktop">
+        <el-button class="gear-btn" link @click="goHardware">
+          <el-icon :size="18"><Setting /></el-icon>
+        </el-button>
+      </el-tooltip>
     </div>
     <div class="header-center">
       <span class="time">{{ currentTime }}</span>
@@ -25,12 +30,20 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
+import { Setting } from '@element-plus/icons-vue'
 import { getTodayStats } from '@/api/pos/pos'
-import { hardwareAPI } from '@/api/hardware'
+import { hardwareAPI, isElectron } from '@/api/hardware'
 
 const route = useRoute()
+const router = useRouter()
 const currentPath = computed(() => route.path)
+const desktop = isElectron()
+
+/** 桌面端齿轮入口：带 from 参数，硬件页可返回来源页面 */
+function goHardware() {
+  router.push({ path: '/system/hardware', query: { from: route.fullPath } })
+}
 
 const online = ref(navigator.onLine)
 let offNetwork: (() => void) | null = null
@@ -101,10 +114,22 @@ defineExpose({
 }
 
 .header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
   .page-title {
     font-size: 18px;
     font-weight: 600;
     color: #303133;
+  }
+
+  .gear-btn {
+    color: #909399;
+
+    &:hover {
+      color: #B4471D;
+    }
   }
 }
 

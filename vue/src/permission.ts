@@ -3,6 +3,7 @@ import { useUserStore } from './store/modules/user'
 import { usePermissionStore } from './store/modules/permission'
 import { useSettingsStore } from './store/modules/settings'
 import { getToken } from './utils/auth'
+import { defaultLandingPath } from './utils/desktop'
 import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
 
@@ -21,7 +22,7 @@ router.beforeEach(async (to, _from, next) => {
 
   if (getToken()) {
     if (to.path === '/login') {
-      next({ path: '/' })
+      next({ path: defaultLandingPath() })
       NProgress.done()
     } else {
       if (!userStore.roles.length) {

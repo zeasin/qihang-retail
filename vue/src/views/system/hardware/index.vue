@@ -1,5 +1,18 @@
 <template>
   <div class="page-container">
+    <!-- 页头：返回来源页 / 回首页 -->
+    <div class="page-title-bar">
+      <h2>硬件设置</h2>
+      <div class="title-actions">
+        <el-button v-if="fromPath" @click="goBack">
+          <el-icon><Back /></el-icon>返回上一页
+        </el-button>
+        <el-button @click="goHome">
+          <el-icon><HomeFilled /></el-icon>{{ desktop ? '回到收银台' : '回到首页' }}
+        </el-button>
+      </div>
+    </div>
+
     <!-- 非桌面端提示 -->
     <el-alert v-if="!desktop" type="warning" :closable="false" class="mb"
       title="当前运行在浏览器环境" description="硬件自检与本机配置仅在 Electron 桌面端可用，以下功能已自动禁用。" />
@@ -57,6 +70,52 @@
           <el-button link type="primary" :disabled="!desktop" @click="handleReadScale">试读</el-button>
         </el-descriptions-item>
       </el-descriptions>
+    </div>
+
+    <!-- 扫码枪实时日志 -->
+    <div class="card mb">
+      <div class="card-header">
+        <h3>扫码枪实时监听</h3>
+        <div>
+          <el-tag v-if="desktop" :type="scanning ? 'success' : 'info'" size="small">
+            {{ scanning ? '监听中' : '已暂停' }}
+          </el-tag>
+          <el-button size="small" @click="scanning = !scanning" v-if="desktop">
+            {{ scanning ? '暂停' : '继续' }}
+          </el-button>
+          <el-button size="small" @click="scanLogs = []" v-if="desktop">清空</el-button>
+        </div>
+      </div>
+      <div class="scan-hint" v-if="!desktop">浏览器环境下无扫码枪事件，此区域不可用。</div>
+      <div class="scan-log-list" v-else>
+        <div v-if="!scanLogs.length" class="scan-empty">扫码测试：光标不在此页也能接收，条码出现即代表扫码枪工作正常</div>
+        <div v-for="(log, i) in scanLogs" :key="i" class="scan-log-item">
+          <span class="scan-time">{{ log.time }}</span>
+          <span class="scan-code">{{ log.code }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 网络连通性 -->
+    <div class="card mb">
+      <div class="card-header">
+        <h3>网络连通性检测</h3>
+        <el-button type="primary" plain :loading="pinging" @click="handlePing">
+          <el-icon><Connection /></el-icon>检测
+        </el-button>
+      </div>
+      <el-form inline>
+        <el-form-item label="检测地址">
+          <el-input v-model="pingUrl" style="width: 360px" placeholder="如 /api/sys-api/login 或 http://localhost:8088" />
+        </el-form-item>
+      </el-form>
+      <div class="ping-result" v-if="pingResult">
+        <el-tag :type="pingResult.ok ? 'success' : 'danger'">
+          {{ pingResult.ok ? '链路可达' : '不可达' }}
+        </el-tag>
+        <span class="ping-detail">{{ pingResult.detail }}</span>
+      </div>
+      <div class="scan-hint">任意 HTTP 状态码（含 401/404）都说明网络链路与服务可达，仅超时/拒绝视为不可达。</div>
     </div>
 
     <!-- 打印设置 -->
@@ -233,12 +292,51 @@
 </template>
 
 <script setup lang="ts">
-import { ref, h, defineComponent, onMounted } from 'vue'
+import { ref, h, defineComponent, onMounted, onUnmounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox, ElTag } from 'element-plus'
+import { Back, HomeFilled, Connection } from '@element-plus/icons-vue'
 import { hardwareAPI, isElectron } from '@/api/hardware'
 
 const desktop = isElectron()
 const baudRates = [1200, 2400, 4800, 9600, 19200, 38400, 115200]
+
+const route = useRoute()
+const router = useRouter()
+
+/** 从 POS 等页面带 ?from= 进入时可返回 */
+const fromPath = (() => {
+  const from = route.query.from as string | undefined
+  return from && from.startsWith('/') && !from.startsWith('//') ? from : ''
+})()
+
+const goBack = () => router.push(fromPath || (desktop ? '/pos/cashier' : '/index'))
+const goHome = () => router.push(desktop ? '/pos/cashier' : '/index')
+
+// ---- 扫码枪实时监听 ----
+const scanning = ref(true)
+const scanLogs = ref<{ time: string; code: string }[]>([])
+let offBarcode: (() => void) | null = null
+
+// ---- 网络连通性检测 ----
+const pingUrl = ref((import.meta.env.VITE_APP_BASE_API || '/api') + '/pos-api/order/today')
+const pinging = ref(false)
+const pingResult = ref<{ ok: boolean; detail: string } | null>(null)
+
+const handlePing = async () => {
+  pinging.value = true
+  pingResult.value = null
+  const start = performance.now()
+  try {
+    const res = await fetch(pingUrl.value, { method: 'GET' })
+    const ms = Math.round(performance.now() - start)
+    pingResult.value = { ok: true, detail: `HTTP ${res.status}，耗时 ${ms}ms（服务可达）` }
+  } catch (e: any) {
+    pingResult.value = { ok: false, detail: '请求失败：' + (e?.message || e) }
+  } finally {
+    pinging.value = false
+  }
+}
 
 const versions = ref<AppVersions | null>(null)
 const configPath = ref('')
@@ -287,32 +385,42 @@ const loadAll = async () => {
 
 const handleProbe = async () => {
   probing.value = true
-  const r = await hardwareAPI.probe()
-  if (r.ok && r.data) status.value = r.data
-  const ps = await hardwareAPI.listSerialPorts()
-  if (ps.ok) ports.value = ps.data || []
-  probing.value = false
-  ElMessage.success('硬件检测完成')
+  try {
+    const r = await hardwareAPI.probe()
+    if (r.ok && r.data) status.value = r.data
+    const ps = await hardwareAPI.listSerialPorts()
+    if (ps.ok) ports.value = ps.data || []
+    ElMessage.success('硬件检测完成')
+  } catch (e: any) {
+    ElMessage.error('检测失败：' + (e?.message || e))
+  } finally {
+    probing.value = false
+  }
 }
 
 const handleSave = async () => {
   if (!config.value) return
   saving.value = true
-  // 只提交硬件相关配置，窗口/服务端口以文件为准
-  const r = await hardwareAPI.setConfig({
-    printer: config.value.printer,
-    cashDrawer: config.value.cashDrawer,
-    customerDisplay: config.value.customerDisplay,
-    scale: config.value.scale
-  })
-  saving.value = false
-  if (r.ok) {
-    config.value = r.data || config.value
-    const st = await hardwareAPI.getStatus()
-    if (st.ok && st.data) status.value = st.data
-    ElMessage.success('配置已保存，硬件已按新配置重新检测')
-  } else {
-    ElMessage.error(r.reason || '保存失败')
+  try {
+    // 只提交硬件相关配置，窗口/服务端口以文件为准
+    const r = await hardwareAPI.setConfig({
+      printer: config.value.printer,
+      cashDrawer: config.value.cashDrawer,
+      customerDisplay: config.value.customerDisplay,
+      scale: config.value.scale
+    })
+    if (r.ok) {
+      config.value = r.data || config.value
+      const st = await hardwareAPI.getStatus()
+      if (st.ok && st.data) status.value = st.data
+      ElMessage.success('配置已保存，硬件已按新配置重新检测')
+    } else {
+      ElMessage.error(r.reason || '保存失败')
+    }
+  } catch (e: any) {
+    ElMessage.error('保存失败：' + (e?.message || e))
+  } finally {
+    saving.value = false
   }
 }
 
@@ -358,12 +466,88 @@ const handleRelaunch = async () => {
     .catch(() => {})
 }
 
-onMounted(loadAll)
+onMounted(() => {
+  loadAll()
+  if (desktop) {
+    offBarcode = hardwareAPI.onBarcode((code) => {
+      if (!scanning.value) return
+      const d = new Date()
+      const pad = (n: number) => String(n).padStart(2, '0')
+      scanLogs.value.unshift({ time: `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`, code })
+      if (scanLogs.value.length > 20) scanLogs.value.pop()
+    })
+  }
+})
+
+onUnmounted(() => {
+  offBarcode?.()
+  offBarcode = null
+})
 </script>
 
 <style scoped lang="scss">
 .page-container {
   padding: 16px;
+}
+.page-title-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+
+  h2 {
+    margin: 0;
+    font-size: 18px;
+    color: #303133;
+  }
+  .title-actions {
+    display: flex;
+    gap: 8px;
+  }
+}
+.scan-hint {
+  font-size: 12px;
+  color: #909399;
+  margin-top: 8px;
+}
+.scan-log-list {
+  max-height: 200px;
+  overflow-y: auto;
+
+  .scan-empty {
+    font-size: 13px;
+    color: #909399;
+    padding: 12px 0;
+  }
+  .scan-log-item {
+    display: flex;
+    gap: 12px;
+    padding: 6px 8px;
+    border-bottom: 1px dashed #ebeef5;
+    font-size: 13px;
+
+    .scan-time {
+      color: #909399;
+      font-variant-numeric: tabular-nums;
+      flex-shrink: 0;
+    }
+    .scan-code {
+      color: #303133;
+      font-weight: 500;
+      word-break: break-all;
+    }
+  }
+}
+.ping-result {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+
+  .ping-detail {
+    font-size: 13px;
+    color: #606266;
+  }
 }
 .card {
   background: #fff;

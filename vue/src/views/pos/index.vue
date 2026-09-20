@@ -323,9 +323,14 @@
         </div>
       </div>
       <template #footer>
-        <el-button class="full-btn" type="primary" @click="showSuccessDialog = false">
-          继续收银
-        </el-button>
+        <div class="success-footer">
+          <el-button v-if="desktop && lastOrderData" @click="reprintLastOrder">
+            <el-icon><Printer /></el-icon>打印小票
+          </el-button>
+          <el-button class="full-btn" type="primary" @click="showSuccessDialog = false">
+            继续收银
+          </el-button>
+        </div>
       </template>
     </el-dialog>
   </div>
@@ -337,7 +342,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   Search, Loading, Goods, Picture, Plus, Minus, Close,
   ShoppingCart, Delete, Wallet, CreditCard, Money, CircleCheckFilled,
-  CollectionTag, Postcard, Box
+  CollectionTag, Postcard, Box, Printer
 } from '@element-plus/icons-vue'
 import { getGoodsList, getSkuInventory, getSkuInventoryBatches, batchSkuInventory } from '@/api/pos/pos'
 import { listCategory } from '@/api/goods/category'
@@ -403,6 +408,9 @@ const showSkuDialog = ref(false)
 const selectedPay = ref('')
 const lastOrderNo = ref('')
 const lastOrderAmount = ref(0)
+const desktop = isElectron()
+/** 成功弹窗补打用：快照最后一单的小票数据 */
+const lastOrderData = ref<{ orderNo: string; items: any[]; total: number; final: number } | null>(null)
 const selectedProduct = ref<Product | null>(null)
 const selectedSku = ref<SkuItem | null>(null)
 
@@ -761,6 +769,7 @@ async function confirmPay() {
     })
     lastOrderNo.value = orderNo
     lastOrderAmount.value = payAmount
+    lastOrderData.value = { orderNo, items: soldItems, total: subAmount, final: payAmount }
     cartItems.value = []
     showSuccessDialog.value = true
     printReceipt(orderNo, soldItems, subAmount, payAmount)
@@ -792,6 +801,13 @@ async function printReceipt(orderNo: string, items: any[], total: number, final:
     receivedAmount: selectedPay.value === 'cash' ? final : undefined,
   })
   if (!r.ok) ElMessage.warning(`小票打印失败：${r.reason || '未知原因'}${r.hint ? '（' + r.hint + '）' : ''}`)
+}
+
+/** 成功弹窗内手动补打最后一单 */
+function reprintLastOrder() {
+  const d = lastOrderData.value
+  if (!d) return
+  printReceipt(d.orderNo, d.items, d.total, d.final)
 }
 
 // ---- 硬件：扫码枪（主进程推送，不依赖页面焦点）----
@@ -1875,6 +1891,17 @@ onUnmounted(() => {
 
     &:hover {
       background: #C55A2A;
+    }
+  }
+
+  .success-footer {
+    display: flex;
+    gap: 12px;
+    width: 100%;
+
+    :deep(.el-button.full-btn) {
+      flex: 1;
+      width: auto;
     }
   }
 }

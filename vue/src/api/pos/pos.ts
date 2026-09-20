@@ -56,6 +56,11 @@ export function getTodayStats(shopId: number) {
   return request({ url: '/pos-api/order/today', method: 'get', params: { shopId } })
 }
 
+/** 首页看板统计（无需门店参数）：今日销售/订单数/会员数/库存预警/近7天趋势/最近订单 */
+export function getPosDashboardStats() {
+  return request({ url: '/pos-api/order/today', method: 'get' })
+}
+
 export function getDailyReport(shopId: number, date: string) {
   return request({ url: '/pos-api/order/daily', method: 'get', params: { shopId, date } })
 }
