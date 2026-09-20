@@ -332,7 +332,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   Search, Loading, Goods, Picture, Plus, Minus, Close,
@@ -342,6 +342,7 @@ import {
 import { getGoodsList, getSkuInventory, getSkuInventoryBatches, batchSkuInventory } from '@/api/pos/pos'
 import { listCategory } from '@/api/goods/category'
 import { submitOrder } from '@/api/pos/pos'
+import { hardwareAPI, isElectron } from '@/api/hardware'
 
 interface InventoryInfo {
   skuId: string
@@ -740,10 +741,13 @@ function handleHold() {
 async function confirmPay() {
   showPaymentDialog.value = false
   const orderNo = 'POS' + Date.now()
+  const soldItems = [...cartItems.value]
+  const payAmount = finalAmount.value
+  const subAmount = subtotal.value
   try {
     await submitOrder({
       orderNo,
-      items: cartItems.value.map(i => ({
+      items: soldItems.map(i => ({
         goodsId: i.goodsId,
         skuId: i.skuId,
         name: i.name,
@@ -752,18 +756,83 @@ async function confirmPay() {
         quantity: i.quantity,
         barCode: i.barCode,
       })),
-      payAmount: finalAmount.value,
+      payAmount,
       payMethod: selectedPay.value,
     })
     lastOrderNo.value = orderNo
-    lastOrderAmount.value = finalAmount.value
+    lastOrderAmount.value = payAmount
     cartItems.value = []
     showSuccessDialog.value = true
+    printReceipt(orderNo, soldItems, subAmount, payAmount)
   } catch (e) {
     console.error(e)
     ElMessage.error('下单失败')
   }
 }
+
+/** 支付成功后打小票（桌面端；失败只提示不阻断收银） */
+async function printReceipt(orderNo: string, items: any[], total: number, final: number) {
+  if (!isElectron()) return
+  const r = await hardwareAPI.printReceipt({
+    title: '收银小票',
+    orderNo,
+    time: new Date().toLocaleString('zh-CN'),
+    items: items.map(i => ({
+      goodsName: i.name,
+      skuName: i.skuName,
+      barcode: i.barCode,
+      unitPrice: i.price,
+      quantity: i.quantity,
+      subtotal: i.price * i.quantity,
+    })),
+    totalAmount: total,
+    discountAmount: Math.max(0, total - final),
+    finalAmount: final,
+    payMethod: selectedPay.value,
+    receivedAmount: selectedPay.value === 'cash' ? final : undefined,
+  })
+  if (!r.ok) ElMessage.warning(`小票打印失败：${r.reason || '未知原因'}${r.hint ? '（' + r.hint + '）' : ''}`)
+}
+
+// ---- 硬件：扫码枪（主进程推送，不依赖页面焦点）----
+let offBarcode: (() => void) | null = null
+
+function findSkuByBarcode(code: string): { product: Product; sku?: SkuItem } | null {
+  const kw = code.toLowerCase()
+  for (const p of products.value) {
+    const sku = p.skuList?.find(s =>
+      (s.barCode && s.barCode.toLowerCase() === kw) ||
+      (s.skuCode && s.skuCode.toLowerCase() === kw)
+    )
+    if (sku) return { product: p, sku }
+    if ((p.barCode && p.barCode.toLowerCase() === kw) || (p.goodsNum && p.goodsNum.toLowerCase() === kw)) {
+      return { product: p }
+    }
+  }
+  return null
+}
+
+async function handleBarcode(code: string) {
+  const hit = findSkuByBarcode(code)
+  if (!hit) {
+    // 未命中已加载商品：转入搜索框，交给收银员人工处理
+    searchKeyword.value = code
+    ElMessage.warning(`条码 ${code} 未匹配到商品，已转入搜索框`)
+    return
+  }
+  if (hit.sku) {
+    await addToCartWithSku(hit.product, hit.sku, hit.sku.batches?.[0])
+  } else if (hit.product.skuList && hit.product.skuList.length > 1) {
+    await handleProductClick(hit.product)
+  } else {
+    await addToCart(hit.product)
+  }
+}
+
+// ---- 硬件：客显屏实时推送应付金额 ----
+watch(finalAmount, (v) => {
+  if (isElectron()) hardwareAPI.displayAmount(v.toFixed(2))
+})
 
 function loadMore() {
   if (hasMore.value) {
@@ -775,6 +844,13 @@ function loadMore() {
 onMounted(() => {
   loadProducts()
   loadCategories()
+  // 扫码枪：桌面端由主进程捕获后推送
+  offBarcode = hardwareAPI.onBarcode(handleBarcode)
+})
+
+onUnmounted(() => {
+  offBarcode?.()
+  offBarcode = null
 })
 </script>
 

@@ -94,6 +94,14 @@ export const constantRoutes = [
         hidden: true,
         meta: { title: '个人中心' },
       },
+      {
+        // 桌面端硬件自检/打印设置（浏览器环境打开会显示降级提示）
+        path: 'system/hardware',
+        name: 'SystemHardware',
+        component: () => import('@/views/system/hardware/index.vue'),
+        hidden: true,
+        meta: { title: '硬件设置' },
+      },
     ],
   },
 ] as RouteRecordRaw[]

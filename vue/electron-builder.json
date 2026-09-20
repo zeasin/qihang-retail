@@ -1,0 +1,34 @@
+{
+  "appId": "com.qihang.retail",
+  "productName": "启航零售ERP",
+  "icon": "build/icon",
+  "directories": {
+    "output": "release"
+  },
+  "files": [
+    "dist/**/*",
+    "dist-electron/**/*",
+    "resources/**/*"
+  ],
+  "asarUnpack": [
+    "node_modules/serialport/**",
+    "node_modules/@serialport/**"
+  ],
+  "npmRebuild": true,
+  "win": {
+    "target": ["nsis"]
+  },
+  "mac": {
+    "target": ["dmg"]
+  },
+  "linux": {
+    "target": ["AppImage"]
+  },
+  "nsis": {
+    "oneClick": false,
+    "allowToChangeInstallationDirectory": true,
+    "createDesktopShortcut": true,
+    "createStartMenuShortcut": true,
+    "shortcutName": "启航零售ERP"
+  }
+}

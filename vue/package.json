@@ -3,10 +3,18 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "main": "dist-electron/main.cjs",
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc -b && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "electron:compile": "node scripts/build-electron.mjs",
+    "electron:dev": "node scripts/electron-dev.mjs",
+    "electron:dev:watch": "node scripts/build-electron.mjs --watch",
+    "electron:build": "npm run build && node scripts/build-electron.mjs",
+    "electron:dist:win": "npm run electron:build && electron-builder --win --config electron-builder.json",
+    "electron:dist:mac": "npm run electron:build && electron-builder --mac --config electron-builder.json",
+    "electron:dist:linux": "npm run electron:build && electron-builder --linux --config electron-builder.json"
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.2",
@@ -19,17 +27,22 @@
     "element-plus": "^2.14.2",
     "file-saver": "^2.0.5",
     "fuse.js": "^7.4.2",
+    "iconv-lite": "^0.6.3",
     "js-cookie": "^3.0.8",
     "jsencrypt": "^3.5.4",
     "marked": "^18.0.6",
     "nprogress": "^0.2.0",
     "path-browserify": "^1.0.1",
     "pinia": "^3.0.4",
+    "qrcode": "^1.5.4",
     "screenfull": "^6.0.2",
     "sortablejs": "^1.15.7",
     "vue": "^3.5.39",
     "vue-i18n": "^9.14.5",
     "vue-router": "^4.6.4"
+  },
+  "optionalDependencies": {
+    "serialport": "^12.0.0"
   },
   "devDependencies": {
     "@types/clipboard": "^2.0.1",
@@ -38,9 +51,12 @@
     "@types/node": "^24.13.2",
     "@types/nprogress": "^0.2.3",
     "@types/path-browserify": "^1.0.3",
+    "@types/qrcode": "^1.5.5",
     "@types/sortablejs": "^1.15.9",
     "@vitejs/plugin-vue": "^6.0.7",
     "@vue/tsconfig": "^0.9.1",
+    "electron": "^32.0.0",
+    "electron-builder": "^25.0.0",
     "fast-glob": "^3.3.3",
     "sass": "^1.101.0",
     "typescript": "~6.0.2",

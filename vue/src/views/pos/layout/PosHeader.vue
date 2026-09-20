@@ -8,6 +8,9 @@
       <span class="date">{{ currentDate }}</span>
     </div>
     <div class="header-right">
+      <el-tag :type="online ? 'success' : 'danger'" size="small" class="net-tag">
+        {{ online ? '网络正常' : '网络断开' }}
+      </el-tag>
       <div class="stat" v-if="currentPath === '/pos/cashier'">
         <span class="stat-label">今日营业额</span>
         <span class="stat-value">¥{{ todaySales.toFixed(2) }}</span>
@@ -24,9 +27,13 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { getTodayStats } from '@/api/pos/pos'
+import { hardwareAPI } from '@/api/hardware'
 
 const route = useRoute()
 const currentPath = computed(() => route.path)
+
+const online = ref(navigator.onLine)
+let offNetwork: (() => void) | null = null
 
 const currentTime = ref('')
 const currentDate = ref('')
@@ -67,10 +74,13 @@ onMounted(() => {
   formatTime()
   timer = window.setInterval(formatTime, 1000)
   loadStats()
+  offNetwork = hardwareAPI.onNetworkStatus((v) => (online.value = v))
 })
 
 onUnmounted(() => {
   if (timer) clearInterval(timer)
+  offNetwork?.()
+  offNetwork = null
 })
 
 defineExpose({
@@ -118,7 +128,12 @@ defineExpose({
 
 .header-right {
   display: flex;
+  align-items: center;
   gap: 24px;
+
+  .net-tag {
+    flex-shrink: 0;
+  }
 
   .stat {
     display: flex;
