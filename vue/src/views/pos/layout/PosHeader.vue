@@ -7,6 +7,11 @@
           <el-icon :size="18"><Setting /></el-icon>
         </el-button>
       </el-tooltip>
+      <el-tooltip content="服务托管（后端/数据库）" placement="bottom" v-if="desktop">
+        <el-button class="gear-btn" link @click="goServices">
+          <el-icon :size="18"><Cpu /></el-icon>
+        </el-button>
+      </el-tooltip>
     </div>
     <div class="header-center">
       <span class="time">{{ currentTime }}</span>
@@ -31,7 +36,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { Setting } from '@element-plus/icons-vue'
+import { Setting, Cpu } from '@element-plus/icons-vue'
 import { getTodayStats } from '@/api/pos/pos'
 import { hardwareAPI, isElectron } from '@/api/hardware'
 
@@ -43,6 +48,11 @@ const desktop = isElectron()
 /** 桌面端齿轮入口：带 from 参数，硬件页可返回来源页面 */
 function goHardware() {
   router.push({ path: '/system/hardware', query: { from: route.fullPath } })
+}
+
+/** 桌面端服务托管入口：后端/MySQL/Redis 检测与启停 */
+function goServices() {
+  router.push({ path: '/system/services', query: { from: route.fullPath } })
 }
 
 const online = ref(navigator.onLine)

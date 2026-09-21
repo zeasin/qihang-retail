@@ -12,6 +12,7 @@ import { loadConfig } from './config'
 import { registerIpc, broadcast } from './ipc/handlers'
 import { createWindow, getMainWindow } from './window'
 import hardware from './hardware'
+import launcher from './launcher/services'
 import { startServer } from './server'
 import type { LocalServer } from './server'
 import type { AppConfig } from './config'
@@ -117,6 +118,22 @@ app.on('before-quit', () => {
   if (localServer) {
     console.log('[main] 关闭本地服务')
     localServer.close()
+  }
+})
+
+// 本程序拉起过服务（MySQL/Redis/后端）时走异步优雅停机，再兜底 killAll 防孤儿进程占端口
+app.on('will-quit', (e) => {
+  if (launcher.hasManaged()) {
+    e.preventDefault()
+    launcher
+      .stopAll()
+      .catch(() => {})
+      .finally(() => {
+        launcher.killAll()
+        app.exit(0)
+      })
+  } else {
+    launcher.killAll()
   }
 })
 

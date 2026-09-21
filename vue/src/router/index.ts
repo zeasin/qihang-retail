@@ -104,6 +104,22 @@ export const constantRoutes = [
       },
     ],
   },
+  {
+    // 桌面端服务托管：独立无框架页面（不带后台侧边栏）——后端没起来时也不该露出管理菜单
+    path: '/system/services',
+    name: 'SystemServices',
+    component: () => import('@/views/system/services/index.vue'),
+    hidden: true,
+    meta: { title: '服务托管' },
+  },
+  {
+    // 桌面端服务状态：独立整页（状态总览 + 启停 + Java 实时日志），免登录随时可进
+    path: '/system/status',
+    name: 'SystemStatus',
+    component: () => import('@/views/system/status/index.vue'),
+    hidden: true,
+    meta: { title: '服务状态' },
+  },
 ] as RouteRecordRaw[]
 
 const router = createRouter({

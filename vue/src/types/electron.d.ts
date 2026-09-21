@@ -84,6 +84,67 @@ interface WindowSettings {
   devtools: boolean
 }
 
+// ---------- 服务托管（launcher）----------
+
+interface LauncherUrls {
+  jdk: string
+  jdkSha256: string
+  mysql: string
+  mysqlSha256: string
+  redis: string
+  redisSha256: string
+  backendJar: string
+  initSql: string
+}
+
+interface LauncherSettings {
+  runtimeDir: string
+  /** 本机已有 JDK 目录（其下有 bin/java.exe），配置后优先于 runtime/jdk */
+  jdkDir: string
+  urls: LauncherUrls
+  backend: { jarPath: string; javaOptions: string; profile: string; applyLocalConfig: boolean }
+  mysql: { port: number; username: string; rootPassword: string; database: string }
+  redis: { port: number }
+}
+
+type LauncherServiceName = 'jdk' | 'mysql' | 'redis' | 'backend'
+
+interface LauncherServiceStatus {
+  name: LauncherServiceName
+  installed: boolean
+  installPath: string
+  running: boolean
+  ownedExternally: boolean
+  pid?: number
+  port?: number
+  message: string
+}
+
+interface LauncherStatus {
+  runtimeDir: string
+  backendUrl: string
+  services: LauncherServiceStatus[]
+}
+
+/** install/start/stop 返回：{ok, message/reason}（safe() 检测到 ok 字段会原样透传） */
+interface LauncherCallResult {
+  ok: boolean
+  message?: string
+  reason?: string
+}
+
+interface LauncherStartAllResult {
+  ok: boolean
+  results: Array<{ name: LauncherServiceName; result: LauncherCallResult }>
+}
+
+interface LauncherProgressPayload {
+  name: LauncherServiceName
+  phase: 'download' | 'extract'
+  downloaded: number
+  total: number
+}
+
 interface AppConfig {
   serverPort: number
   window: WindowSettings
@@ -91,6 +152,7 @@ interface AppConfig {
   cashDrawer: CashDrawerSettings
   customerDisplay: CustomerDisplaySettings
   scale: ScaleSettings
+  launcher: LauncherSettings
   backendUrl: string
   apiPrefix: string
 }
@@ -179,9 +241,31 @@ interface ElectronAPI {
   displayAmount(text: string): Promise<IpcResult>
   readScale(): Promise<ScaleReadResult>
 
+  // 服务托管
+  launcherStatus(): Promise<IpcResult<LauncherStatus>>
+  /** 启动阶段后端探活：handler 返回 {reachable,url,...}，无 ok 键 → safe() 包成 {ok:true, data} */
+  launcherCheckBackend(): Promise<IpcResult<{ reachable: boolean; url: string; status?: number; error?: string }>>
+  launcherInstall(name: LauncherServiceName): Promise<LauncherCallResult>
+  launcherStart(name: LauncherServiceName): Promise<LauncherCallResult>
+  launcherStop(name: LauncherServiceName): Promise<LauncherCallResult>
+  launcherStartAll(): Promise<LauncherStartAllResult>
+  launcherStopAll(): Promise<IpcResult>
+  launcherLog(name: LauncherServiceName): Promise<IpcResult<{ text: string }>>
+  launcherOpenDir(): Promise<IpcResult<{ path: string }>>
+  launcherPickJar(): Promise<IpcResult<string>>
+  /** 选择本地 JDK 目录，返回绝对路径（data） */
+  launcherPickJdkDir(): Promise<IpcResult<string>>
+  /** 测试 JDK（java -version）；dir 可传尚未保存的目录，留空按已保存配置解析。透传 {ok, message/reason, output?} */
+  launcherTestJdk(dir?: string): Promise<LauncherCallResult & { output?: string }>
+  /** 选择本机 .sql 文件，返回绝对路径（data） */
+  launcherPickSql(): Promise<IpcResult<string>>
+  /** 导入 SQL 初始化数据库；file 留空则用配置的 initSql 下载地址 */
+  launcherInitDb(file?: string): Promise<LauncherCallResult>
+
   // 主进程 → 渲染进程事件（返回取消订阅函数）
   onBarcode(callback: (code: string) => void): () => void
   onNetworkStatus(callback: (online: boolean) => void): () => void
+  onLauncherProgress(callback: (payload: LauncherProgressPayload) => void): () => void
 }
 
 type DeepPartial<T> = { [K in keyof T]?: T[K] extends object ? DeepPartial<T[K]> : T[K] }

@@ -45,6 +45,22 @@ contextBridge.exposeInMainWorld('electronAPI', {
   displayAmount: (text: string) => invoke('hardware:display-amount', text),
   readScale: () => invoke('hardware:scale-read'),
 
+  // ---- 服务托管（后端/数据库环境检测、安装、启停）----
+  launcherStatus: () => invoke('launcher:status'),
+  launcherCheckBackend: () => invoke('launcher:backend'),
+  launcherInstall: (name: string) => invoke('launcher:install', name),
+  launcherStart: (name: string) => invoke('launcher:start', name),
+  launcherStop: (name: string) => invoke('launcher:stop', name),
+  launcherStartAll: () => invoke('launcher:start-all'),
+  launcherStopAll: () => invoke('launcher:stop-all'),
+  launcherLog: (name: string) => invoke('launcher:log', name),
+  launcherOpenDir: () => invoke('launcher:open-dir'),
+  launcherPickJar: () => invoke('launcher:pick-jar'),
+  launcherPickJdkDir: () => invoke('launcher:pick-jdk-dir'),
+  launcherTestJdk: (dir?: string) => invoke('launcher:test-jdk', dir),
+  launcherPickSql: () => invoke('launcher:pick-sql'),
+  launcherInitDb: (file?: string) => invoke('launcher:init-db', file),
+
   // ---- 主进程 → 渲染进程 事件 ----
   /**
    * 扫码枪回调。返回取消订阅函数。
@@ -61,5 +77,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
     const listener = (_event: unknown, online: boolean) => callback(online)
     ipcRenderer.on('network-status', listener)
     return () => ipcRenderer.removeListener('network-status', listener)
+  },
+  /** 服务托管安装进度（name/phase/downloaded/total） */
+  onLauncherProgress: (callback: (payload: unknown) => void) => {
+    const listener = (_event: unknown, payload: unknown) => callback(payload)
+    ipcRenderer.on('launcher-progress', listener)
+    return () => ipcRenderer.removeListener('launcher-progress', listener)
   }
 })

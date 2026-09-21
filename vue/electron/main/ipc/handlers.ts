@@ -5,9 +5,11 @@
  * 所有 handler 都返回 { ok, ... } 结构，不抛异常到渲染进程，避免页面白屏。
  */
 
-import { ipcMain, app, shell, BrowserWindow } from 'electron'
+import { ipcMain, app, shell, BrowserWindow, dialog } from 'electron'
 import fs from 'fs'
 import hardware from '../hardware'
+import launcher from '../launcher/services'
+import type { ServiceName } from '../launcher/services'
 import { getConfigPath, loadConfig, saveConfig } from '../config'
 import type { AppConfig } from '../config'
 
@@ -184,6 +186,94 @@ export function registerIpc(): void {
     'hardware:scale-read',
     safe(() => hardware.readScale())
   )
+
+  // ---- 服务托管（借鉴 qihang-launcher：检测/下载安装/启停 JDK、MySQL、Redis、后端）----
+  ipcMain.handle(
+    'launcher:status',
+    safe(() => launcher.status())
+  )
+
+  /** 启动阶段后端探活（轻量，只查 backendUrl 可达性） */
+  ipcMain.handle(
+    'launcher:backend',
+    safe(() => launcher.checkBackend())
+  )
+
+  ipcMain.handle(
+    'launcher:install',
+    safe((_e, name: ServiceName) =>
+      launcher.install(name, (p) => broadcast('launcher-progress', p))
+    )
+  )
+
+  ipcMain.handle('launcher:start', safe((_e, name: ServiceName) => launcher.start(name)))
+  ipcMain.handle('launcher:stop', safe((_e, name: ServiceName) => launcher.stop(name)))
+  ipcMain.handle('launcher:start-all', safe(() => launcher.startAll()))
+  ipcMain.handle('launcher:stop-all', safe(() => launcher.stopAll()))
+  ipcMain.handle('launcher:log', safe((_e, name: ServiceName) => ({ text: launcher.logTail(name) })))
+  ipcMain.handle(
+    'launcher:open-dir',
+    safe(async () => {
+      const dir = launcher.runtimeDir()
+      fs.mkdirSync(dir, { recursive: true })
+      const err = await shell.openPath(dir)
+      if (err) throw new Error(err)
+      return { path: dir }
+    })
+  )
+
+  /** 选择本机已有的后端 jar（客户现场 jar 不在 runtime 下时用） */
+  ipcMain.handle(
+    'launcher:pick-jar',
+    safe(async (e) => {
+      const win = BrowserWindow.fromWebContents(e.sender)
+      const opts = {
+        title: '选择后端 jar',
+        filters: [{ name: 'Java 包', extensions: ['jar'] }],
+        properties: ['openFile'] as ['openFile']
+      }
+      const r = win ? await dialog.showOpenDialog(win, opts) : await dialog.showOpenDialog(opts)
+      if (r.canceled || !r.filePaths[0]) return { ok: false, reason: '已取消' }
+      return { ok: true, data: r.filePaths[0] }
+    })
+  )
+
+  /** 选择本机已有 JDK 的目录（launcher.jdkDir） */
+  ipcMain.handle(
+    'launcher:pick-jdk-dir',
+    safe(async (e) => {
+      const win = BrowserWindow.fromWebContents(e.sender)
+      const opts = {
+        title: '选择本地 JDK 目录（其下有 bin\\java.exe）',
+        properties: ['openDirectory'] as ['openDirectory']
+      }
+      const r = win ? await dialog.showOpenDialog(win, opts) : await dialog.showOpenDialog(opts)
+      if (r.canceled || !r.filePaths[0]) return { ok: false, reason: '已取消' }
+      return { ok: true, data: r.filePaths[0] }
+    })
+  )
+
+  /** 测试 JDK 是否可用（java -version）；参数可传尚未保存的目录，留空按已保存配置解析 */
+  ipcMain.handle('launcher:test-jdk', safe((_e, dir?: string) => launcher.testJava(dir)))
+
+  /** 选择本机 SQL 文件（初始化数据库用） */
+  ipcMain.handle(
+    'launcher:pick-sql',
+    safe(async (e) => {
+      const win = BrowserWindow.fromWebContents(e.sender)
+      const opts = {
+        title: '选择初始化 SQL 文件',
+        filters: [{ name: 'SQL 文件', extensions: ['sql'] }],
+        properties: ['openFile'] as ['openFile']
+      }
+      const r = win ? await dialog.showOpenDialog(win, opts) : await dialog.showOpenDialog(opts)
+      if (r.canceled || !r.filePaths[0]) return { ok: false, reason: '已取消' }
+      return { ok: true, data: r.filePaths[0] }
+    })
+  )
+
+  /** 导入 SQL 建表/初始化数据；file 留空则用配置的 initSql 下载地址 */
+  ipcMain.handle('launcher:init-db', safe((_e, file?: string) => launcher.importSql(file)))
 }
 
 /** 主进程主动推给渲染进程的事件（网络状态等） */

@@ -72,6 +72,46 @@ export interface WindowSettings {
   devtools: boolean
 }
 
+/** 服务托管（launcher）下载源，借鉴 qihang-launcher 的 manifest；sha256 留空 = 跳过校验 */
+export interface LauncherUrls {
+  jdk: string
+  jdkSha256: string
+  mysql: string
+  mysqlSha256: string
+  redis: string
+  redisSha256: string
+  /** 后端 erp-api jar 下载地址，留空 = 只能手动指定本机 jar 路径 */
+  backendJar: string
+  /** 初始化 SQL（可选），页面「初始化数据库」时下载并导入 */
+  initSql: string
+}
+
+export interface LauncherSettings {
+  /** 绿色运行时根目录，留空 = <userData>/runtime（JDK/MySQL/Redis/jar 全部装这里，不碰系统） */
+  runtimeDir: string
+  /** 本机已有 JDK 的目录（其下应有 bin/java.exe）；配置后优先于 runtime/jdk，不再需要下载 */
+  jdkDir: string
+  urls: LauncherUrls
+  backend: {
+    /** 后端 jar 绝对路径；留空则自动在 runtime/apps 下找 *.jar */
+    jarPath: string
+    /** 追加的 JVM 参数，如 -Xmx512m */
+    javaOptions: string
+    /** spring profile，留空则不加 */
+    profile: string
+    /** true = 启动后端时用下方 MySQL/Redis 配置覆盖连接参数（命令行参数优先级高于 jar 内 yml） */
+    applyLocalConfig: boolean
+  }
+  mysql: {
+    port: number
+    username: string
+    /** 首次初始化 portable MySQL 时设置的 root 密码；之后以配置文件为准 */
+    rootPassword: string
+    database: string
+  }
+  redis: { port: number }
+}
+
 export interface AppConfig {
   /** 本地服务端口，0 = 随机分配空闲端口（推荐，避免和本机其它服务冲突） */
   serverPort: number
@@ -80,6 +120,8 @@ export interface AppConfig {
   cashDrawer: CashDrawerSettings
   customerDisplay: CustomerDisplaySettings
   scale: ScaleSettings
+  /** 服务托管：检测/下载/启动 JDK、MySQL、Redis、后端 jar */
+  launcher: LauncherSettings
   /** 以下两项由 deploy.config.ts 强制覆盖，不落盘 */
   backendUrl: string
   apiPrefix: string
@@ -127,6 +169,24 @@ export const DEFAULT_CONFIG: Omit<PersistableConfig, never> = {
     path: 'COM4',
     baudRate: 9600,
     delimiter: '\r\n'
+  },
+  // ---- 服务托管（下载源与 qihang-launcher 的 manifest 保持一致）----
+  launcher: {
+    runtimeDir: '',
+    jdkDir: '',
+    urls: {
+      jdk: 'https://mirrors.tuna.tsinghua.edu.cn/Adoptium/17/jdk/x64/windows/OpenJDK17U-jdk_x64_windows_hotspot_17.0.20.1_1.zip',
+      jdkSha256: '',
+      mysql: 'https://mirrors.huaweicloud.com/mysql/Downloads/MySQL-8.0/mysql-8.0.29-winx64.zip',
+      mysqlSha256: '',
+      redis: 'https://github.com/tporadowski/redis/releases/download/v5.0.14.1/Redis-x64-5.0.14.1.zip',
+      redisSha256: '',
+      backendJar: '',
+      initSql: ''
+    },
+    backend: { jarPath: '', javaOptions: '', profile: '', applyLocalConfig: true },
+    mysql: { port: 3306, username: 'root', rootPassword: 'root', database: 'qihang-erp' },
+    redis: { port: 6379 }
   }
 }
 

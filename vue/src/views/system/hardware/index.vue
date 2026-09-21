@@ -4,6 +4,9 @@
     <div class="page-title-bar">
       <h2>硬件设置</h2>
       <div class="title-actions">
+        <el-button type="primary" plain @click="router.push({ path: '/system/services', query: { from: route.fullPath } })">
+          <el-icon><Cpu /></el-icon>服务托管
+        </el-button>
         <el-button v-if="fromPath" @click="goBack">
           <el-icon><Back /></el-icon>返回上一页
         </el-button>
@@ -295,7 +298,7 @@
 import { ref, h, defineComponent, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox, ElTag } from 'element-plus'
-import { Back, HomeFilled, Connection } from '@element-plus/icons-vue'
+import { Back, HomeFilled, Connection, Cpu } from '@element-plus/icons-vue'
 import { hardwareAPI, isElectron } from '@/api/hardware'
 
 const desktop = isElectron()

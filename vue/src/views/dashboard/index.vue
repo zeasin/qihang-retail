@@ -118,6 +118,14 @@
               <div class="quick-icon" style="background-color: #67c23a"><el-icon><Setting /></el-icon></div>
               <span>硬件设置</span>
             </div>
+            <div class="quick-item" @click="goPath('/system/services')">
+              <div class="quick-icon" style="background-color: #409eff; opacity: 0.85"><el-icon><Cpu /></el-icon></div>
+              <span>服务托管</span>
+            </div>
+            <div class="quick-item" @click="goPath('/system/status')">
+              <div class="quick-icon" style="background-color: #e6a23c"><el-icon><DataAnalysis /></el-icon></div>
+              <span>服务状态</span>
+            </div>
           </div>
         </div>
       </el-col>
@@ -190,7 +198,8 @@ import {
   Warning,
   List,
   DataAnalysis,
-  Setting
+  Setting,
+  Cpu
 } from '@element-plus/icons-vue'
 import { useUserStore } from '@/store/modules/user'
 import { getPosDashboardStats } from '@/api/pos/pos'

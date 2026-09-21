@@ -4,12 +4,14 @@ import { usePermissionStore } from './store/modules/permission'
 import { useSettingsStore } from './store/modules/settings'
 import { getToken } from './utils/auth'
 import { defaultLandingPath } from './utils/desktop'
+import { ensureBackendOrGuide } from './utils/backendGuide'
 import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
 
 NProgress.configure({ showSpinner: false })
 
-const whiteList = ['/login', '/401', '/404']
+// 服务托管/服务状态页只走本机 IPC，不依赖登录态；后端起不来时恰恰需要在未登录时打开它们，必须放行
+const whiteList = ['/login', '/401', '/404', '/system/services', '/system/status']
 
 router.beforeEach(async (to, _from, next) => {
   NProgress.start()
@@ -30,6 +32,8 @@ router.beforeEach(async (to, _from, next) => {
           await userStore.GetInfo()
           await permissionStore.GenerateRoutes()
           next({ ...to, replace: true })
+          // 桌面端 token 仍有效时不会经过登录页，这里补一次后端探测引导
+          ensureBackendOrGuide()
         } catch (e) {
           await userStore.FedLogOut()
           next(`/login?redirect=${to.path}`)

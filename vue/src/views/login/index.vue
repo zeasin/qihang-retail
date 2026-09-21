@@ -57,6 +57,13 @@
             </el-button>
           </el-form-item>
         </el-form>
+        <!-- 桌面端：后端拉起后回登录页刷新状态（重载验证码 + 重新探测后端） -->
+        <div v-if="isDesktop" class="login-tools">
+          <el-button link type="primary" @click="refreshPage">
+            <el-icon class="tools-icon"><Refresh /></el-icon>
+            刷新（重新检测后端）
+          </el-button>
+        </div>
       </div>
     </div>
     <div class="el-login-footer">
@@ -74,10 +81,19 @@ import type { FormInstance, FormRules } from 'element-plus'
 import { useUserStore } from '@/store/modules/user'
 import { getCodeImg } from '@/api/login'
 import { defaultLandingPath } from '@/utils/desktop'
+import { ensureBackendOrGuide } from '@/utils/backendGuide'
+import { isElectron } from '@/api/hardware'
 
 const router = useRouter()
 const route = useRoute()
 const userStore = useUserStore()
+
+const isDesktop = isElectron()
+
+/** 桌面端刷新：整页重载 —— 重新拉验证码、重跑后端探测（backendGuide 的一次性标记也随之复位） */
+function refreshPage() {
+  window.location.reload()
+}
 
 const title = ref(import.meta.env.VITE_APP_TITLE)
 const formRef = ref<FormInstance>()
@@ -150,7 +166,11 @@ async function handleLogin() {
 onMounted(async () => {
   redirect.value = route.query.redirect as string | undefined
   loading.value = true
-  await getCode()
+  // 桌面端：进入登录页即探测后端，连不上弹框引导去「服务托管」（不阻塞验证码加载）
+  ensureBackendOrGuide()
+  await getCode().catch(() => {
+    loading.value = false
+  })
   getCookie()
 })
 </script>
@@ -265,6 +285,18 @@ onMounted(async () => {
       padding: 15px 0;
       font-weight: 500;
       height: auto;
+    }
+  }
+
+  .login-tools {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 40px;
+    text-align: center;
+
+    .tools-icon {
+      margin-right: 4px;
     }
   }
 
